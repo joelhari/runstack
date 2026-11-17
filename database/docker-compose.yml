@@ -1,0 +1,13 @@
+name: runstack
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: runstack
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5332:5432"
+    restart: unless-stopped
+    labels:
+      org.springframework.boot.jdbc.parameters: 'ssl=true&sslmode=require'
