@@ -28,4 +28,27 @@ public class ActivityMapper {
         activityDTO.setAveragePace(activity.getAveragePace());
         return activityDTO;
     }
+
+    public ActivityLapDTO toActivityLapDTO(ActivityLap lap) {
+        return new ActivityLapDTO(
+                lap.getId(),
+                lap.getLapIndex(),
+                lap.getStartedAt(),
+                lap.getEndedAt(),
+                lap.getElapsedDuration(),
+                lap.getTimerDuration(),
+                lap.getDistance(),
+                lap.getAveragePace(),
+                lap.getAverageSpeed(),
+                lap.getMaximumSpeed(),
+                lap.getAverageHeartRate(),
+                lap.getMaximumHeartRate(),
+                lap.getAverageCadence(),
+                lap.getMaximumCadence(),
+                lap.getAveragePower(),
+                lap.getMaximumPower(),
+                lap.getCalories(),
+                lap.getAscent(),
+                lap.getDescent());
+    }
 }

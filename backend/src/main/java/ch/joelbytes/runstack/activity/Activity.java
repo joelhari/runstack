@@ -17,6 +17,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 
 @Entity
@@ -60,6 +61,7 @@ public class Activity {
     private List<ActivityRecord> records = new ArrayList<>();
 
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("lapIndex ASC")
     private List<ActivityLap> laps = new ArrayList<>();
 
     public Long getId() {

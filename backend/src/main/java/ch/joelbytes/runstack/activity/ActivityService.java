@@ -34,6 +34,11 @@ public class ActivityService {
                 .orElseThrow(() -> new ActivityNotFoundException(id));
     }
 
+    @Transactional(readOnly = true)
+    public List<ActivityLap> getActivityLaps(long id) {
+        return List.copyOf(getActivity(id).getLaps());
+    }
+
     @Transactional
     public Activity importFitFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {

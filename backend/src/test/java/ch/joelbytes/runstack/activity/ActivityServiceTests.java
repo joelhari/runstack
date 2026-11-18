@@ -54,6 +54,21 @@ class ActivityServiceTests {
     }
 
     @Test
+    void getsActivityLaps() {
+        ActivityRepository repository = mock(ActivityRepository.class);
+        Activity activity = new Activity();
+        ActivityLap lap = new ActivityLap();
+        lap.setLapIndex(0);
+        activity.addLap(lap);
+        when(repository.findById(42L)).thenReturn(Optional.of(activity));
+        ActivityService service = new ActivityService(repository, mock(FitActivityParser.class));
+
+        List<ActivityLap> result = service.getActivityLaps(42L);
+
+        assertThat(result).containsExactly(lap);
+    }
+
+    @Test
     void importsAndSavesFitActivity() {
         ActivityRepository repository = mock(ActivityRepository.class);
         FitActivityParser parser = mock(FitActivityParser.class);

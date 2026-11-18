@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -45,6 +46,26 @@ class ActivityControllerTests {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().getId()).isEqualTo(42L);
         assertThat(response.getBody().getName()).isEqualTo("Morning run");
+    }
+
+    @Test
+    void getsActivityLapsAsDtos() {
+        ActivityService service = mock(ActivityService.class);
+        ActivityLap lap = new ActivityLap();
+        lap.setLapIndex(1);
+        lap.setDistance(1_000F);
+        lap.setAveragePace(Duration.ofMinutes(5));
+        when(service.getActivityLaps(42L)).thenReturn(List.of(lap));
+        ActivityController controller = new ActivityController(new ActivityMapper(), service);
+
+        ResponseEntity<List<ActivityLapDTO>> response = controller.getActivityLaps(42L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).singleElement().satisfies(dto -> {
+            assertThat(dto.lapIndex()).isEqualTo(1);
+            assertThat(dto.distance()).isEqualTo(1_000F);
+            assertThat(dto.averagePace()).isEqualTo(Duration.ofMinutes(5));
+        });
     }
 
     @Test

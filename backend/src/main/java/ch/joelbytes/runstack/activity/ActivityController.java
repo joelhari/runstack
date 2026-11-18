@@ -42,6 +42,14 @@ public class ActivityController {
         return ResponseEntity.ok(activityMapper.toActivityDTO(activity));
     }
 
+    @GetMapping("/{id}/laps")
+    public ResponseEntity<List<ActivityLapDTO>> getActivityLaps(@PathVariable long id) {
+        List<ActivityLapDTO> laps = activityService.getActivityLaps(id).stream()
+                .map(activityMapper::toActivityLapDTO)
+                .toList();
+        return ResponseEntity.ok(laps);
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ActivityDTO> importFitFile(@RequestPart("file") MultipartFile file) {
         Activity activity = activityService.importFitFile(file);
