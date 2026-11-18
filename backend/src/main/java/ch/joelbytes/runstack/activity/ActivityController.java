@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -33,6 +34,12 @@ public class ActivityController {
         List<Activity> activities = activityService.getAllActivities();
         List<ActivityDTO> activityDTOs = activities.stream().map(activityMapper::toActivityDTO).collect(Collectors.toList());
         return ResponseEntity.ok().body(activityDTOs);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ActivityDTO> getActivity(@PathVariable long id) {
+        Activity activity = activityService.getActivity(id);
+        return ResponseEntity.ok(activityMapper.toActivityDTO(activity));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

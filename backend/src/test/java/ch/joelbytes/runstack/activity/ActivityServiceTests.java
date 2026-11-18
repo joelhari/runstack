@@ -1,6 +1,7 @@
 package ch.joelbytes.runstack.activity;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +27,30 @@ class ActivityServiceTests {
 
         assertThat(result).containsExactly(activity);
         verify(repository).findAll();
+    }
+
+    @Test
+    void getsActivityByIdFromRepository() {
+        ActivityRepository repository = mock(ActivityRepository.class);
+        Activity activity = new Activity();
+        when(repository.findById(42L)).thenReturn(Optional.of(activity));
+        ActivityService service = new ActivityService(repository, mock(FitActivityParser.class));
+
+        Activity result = service.getActivity(42L);
+
+        assertThat(result).isSameAs(activity);
+        verify(repository).findById(42L);
+    }
+
+    @Test
+    void throwsNotFoundForUnknownActivity() {
+        ActivityRepository repository = mock(ActivityRepository.class);
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        ActivityService service = new ActivityService(repository, mock(FitActivityParser.class));
+
+        assertThatThrownBy(() -> service.getActivity(99L))
+                .isInstanceOf(ActivityNotFoundException.class)
+                .hasMessage("Activity with id 99 was not found");
     }
 
     @Test

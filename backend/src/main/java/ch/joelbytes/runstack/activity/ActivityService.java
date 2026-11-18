@@ -29,6 +29,11 @@ public class ActivityService {
         return activityRepository.findAll();
     }
 
+    public Activity getActivity(long id) {
+        return activityRepository.findById(id)
+                .orElseThrow(() -> new ActivityNotFoundException(id));
+    }
+
     @Transactional
     public Activity importFitFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
