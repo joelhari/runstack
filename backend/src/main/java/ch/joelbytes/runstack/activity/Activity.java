@@ -2,6 +2,8 @@ package ch.joelbytes.runstack.activity;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -13,6 +15,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -22,6 +26,9 @@ public class Activity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "fit_file_hash", length = 64, unique = true)
+    private String fitFileHash;
 
     private String name;
 
@@ -36,7 +43,7 @@ public class Activity {
     private Instant updatedAt;
 
     @JdbcTypeCode(SqlTypes.TIMESTAMP)
-    @Column(nullable = false)
+    @Column
     private Instant date;
 
     private Float distance;
@@ -49,11 +56,20 @@ public class Activity {
     @Column(name = "average_pace", columnDefinition = "INTERVAL")
     private Duration averagePace;
 
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ActivityRecord> records = new ArrayList<>();
+
     public Long getId() {
         return id;
     }
     public void setId(Long id) {
         this.id = id;
+    }
+    public String getFitFileHash() {
+        return fitFileHash;
+    }
+    public void setFitFileHash(String fitFileHash) {
+        this.fitFileHash = fitFileHash;
     }
     public String getName() {
         return name;
@@ -96,5 +112,16 @@ public class Activity {
     }
     public void setAveragePace(Duration averagePace) {
         this.averagePace = averagePace;
+    }
+    public List<ActivityRecord> getRecords() {
+        return records;
+    }
+    public void addRecord(ActivityRecord record) {
+        records.add(record);
+        record.setActivity(this);
+    }
+    public void replaceRecords(List<ActivityRecord> newRecords) {
+        records.clear();
+        newRecords.forEach(this::addRecord);
     }
 }

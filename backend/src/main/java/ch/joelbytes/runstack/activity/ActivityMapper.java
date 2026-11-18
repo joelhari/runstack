@@ -8,6 +8,7 @@ public class ActivityMapper {
     public Activity toActivity(ActivityDTO activityDTO) {
         Activity activity = new Activity();
         activity.setId(activityDTO.getId());
+        activity.setFitFileHash(activityDTO.getFitFileHash());
         activity.setName(activityDTO.getName());
         activity.setDate(activityDTO.getDate());
         activity.setDistance(activityDTO.getDistance());
@@ -19,6 +20,7 @@ public class ActivityMapper {
     public ActivityDTO toActivityDTO(Activity activity) {
         ActivityDTO activityDTO = new ActivityDTO();
         activityDTO.setId(activity.getId());
+        activityDTO.setFitFileHash(activity.getFitFileHash());
         activityDTO.setName(activity.getName());
         activityDTO.setDate(activity.getDate());
         activityDTO.setDistance(activity.getDistance());

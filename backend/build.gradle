@@ -27,6 +27,8 @@ dependencies {
 
     implementation 'org.slf4j:slf4j-api'
 
+	implementation 'com.garmin:fit:21.222.0'
+
     runtimeOnly 'org.postgresql:postgresql'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

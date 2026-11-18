@@ -6,6 +6,7 @@ import java.time.Instant;
 public class ActivityDTO {
 
     private Long id;
+    private String fitFileHash;
     private String name;
     private Instant date;
     private Float distance;
@@ -17,6 +18,12 @@ public class ActivityDTO {
     }
     public void setId(Long id) {
         this.id = id;
+    }
+    public String getFitFileHash() {
+        return fitFileHash;
+    }
+    public void setFitFileHash(String fitFileHash) {
+        this.fitFileHash = fitFileHash;
     }
     public String getName() {
         return name;

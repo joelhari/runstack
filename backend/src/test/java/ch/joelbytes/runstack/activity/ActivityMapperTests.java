@@ -15,6 +15,7 @@ class ActivityMapperTests {
     void mapsActivityToDto() {
         Activity activity = new Activity();
         activity.setId(42L);
+        activity.setFitFileHash("abc123");
         activity.setName("Morning run");
         activity.setDate(Instant.parse("2026-11-17T07:30:00Z"));
         activity.setDistance(10.24F);
@@ -24,6 +25,7 @@ class ActivityMapperTests {
         ActivityDTO result = activityMapper.toActivityDTO(activity);
 
         assertThat(result.getId()).isEqualTo(42L);
+        assertThat(result.getFitFileHash()).isEqualTo("abc123");
         assertThat(result.getName()).isEqualTo("Morning run");
         assertThat(result.getDate()).isEqualTo(activity.getDate());
         assertThat(result.getDistance()).isEqualTo(activity.getDistance());
@@ -35,6 +37,7 @@ class ActivityMapperTests {
     void mapsDtoToActivity() {
         ActivityDTO activityDTO = new ActivityDTO();
         activityDTO.setId(42L);
+        activityDTO.setFitFileHash("abc123");
         activityDTO.setName("Morning run");
         activityDTO.setDate(Instant.parse("2026-11-17T07:30:00Z"));
         activityDTO.setDistance(10.24F);
@@ -44,6 +47,7 @@ class ActivityMapperTests {
         Activity result = activityMapper.toActivity(activityDTO);
 
         assertThat(result.getId()).isEqualTo(42L);
+        assertThat(result.getFitFileHash()).isEqualTo("abc123");
         assertThat(result.getName()).isEqualTo("Morning run");
         assertThat(result.getDate()).isEqualTo(activityDTO.getDate());
         assertThat(result.getDistance()).isEqualTo(activityDTO.getDistance());

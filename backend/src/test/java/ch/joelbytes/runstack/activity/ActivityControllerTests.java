@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 class ActivityControllerTests {
 
@@ -28,5 +29,23 @@ class ActivityControllerTests {
             assertThat(activityDTO.getId()).isEqualTo(42L);
             assertThat(activityDTO.getName()).isEqualTo("Morning run");
         });
+    }
+
+    @Test
+    void importsFitFileAndReturnsCreatedActivity() {
+        ActivityService service = mock(ActivityService.class);
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "run.fit", "application/octet-stream", new byte[] { 1 });
+        Activity activity = new Activity();
+        activity.setId(43L);
+        activity.setName("Garmin running");
+        when(service.importFitFile(file)).thenReturn(activity);
+        ActivityController controller = new ActivityController(new ActivityMapper(), service);
+
+        ResponseEntity<ActivityDTO> response = controller.importFitFile(file);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody().getId()).isEqualTo(43L);
+        assertThat(response.getBody().getName()).isEqualTo("Garmin running");
     }
 }
