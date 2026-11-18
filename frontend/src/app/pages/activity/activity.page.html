@@ -30,6 +30,25 @@
 
       @if (laps$ | async; as laps) {
         @if (laps.length) {
+          <figure class="lap-chart mb-5">
+            <figcaption class="fw-semibold mb-3">Pace by lap distance</figcaption>
+            <app-bar-chart
+              [records]="lapChartRecords(laps)"
+              xField="distance"
+              yField="pace"
+              barWidthField="lapDistance"
+              [minX]="0"
+              [maxX]="lapChartMaxDistance(laps)"
+              [xAxisInterval]="5000"
+              [xAxisPipe]="kilometersPipe"
+              [xAxisPipeArgs]="[0]"
+              [minY]="lapChartMinPace(laps)"
+              [maxY]="lapChartMaxPace(laps)"
+              [yAxisInterval]="10000"
+              [yAxisPipe]="durationPipe"
+            />
+          </figure>
+
           <div class="table-responsive">
             <table class="table table-striped table-hover align-middle">
               <thead>

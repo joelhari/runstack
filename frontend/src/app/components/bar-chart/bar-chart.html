@@ -1,0 +1,56 @@
+<svg
+  class="bar-chart"
+  viewBox="0 0 800 400"
+  role="img"
+  aria-label="Bar chart"
+  preserveAspectRatio="xMidYMid meet"
+>
+  <rect
+    class="bar-chart__background"
+    [attr.x]="plot.left"
+    [attr.y]="plot.top"
+    [attr.width]="plot.width"
+    [attr.height]="plot.height"
+  />
+
+  @for (line of verticalGridLines(); track line.position) {
+    <line
+      class="bar-chart__grid-line"
+      [attr.x1]="line.position"
+      [attr.x2]="line.position"
+      [attr.y1]="plot.top"
+      [attr.y2]="plot.bottom + tickLength"
+    />
+    <text class="bar-chart__x-label" [attr.x]="line.position" y="377">{{ line.label }}</text>
+  }
+
+  @for (line of horizontalGridLines(); track line.position) {
+    <line
+      class="bar-chart__grid-line"
+      [attr.x1]="plot.left - tickLength"
+      [attr.x2]="plot.right"
+      [attr.y1]="line.position"
+      [attr.y2]="line.position"
+    />
+    <text class="bar-chart__y-label" x="58" [attr.y]="line.position">{{ line.label }}</text>
+  }
+
+  @for (bar of bars(); track $index) {
+    <path
+      class="bar-chart__bar"
+      [attr.d]="barPath(bar)"
+      [attr.x]="bar.x"
+      [attr.y]="bar.y"
+      [attr.width]="bar.width"
+      [attr.height]="bar.height"
+    />
+  }
+
+  <rect
+    class="bar-chart__outline"
+    [attr.x]="plot.left"
+    [attr.y]="plot.top"
+    [attr.width]="plot.width"
+    [attr.height]="plot.height"
+  />
+</svg>

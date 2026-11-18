@@ -61,7 +61,7 @@
   >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <form (submit)="$event.preventDefault(); uploadActivity()">
+        <form (submit)="$event.preventDefault(); uploadActivities()">
           <div class="modal-header">
             <h2 class="modal-title fs-5" id="upload-activity-title">Upload activity</h2>
             <button
@@ -74,16 +74,23 @@
           </div>
 
           <div class="modal-body">
-            <label class="form-label" for="activity-file">FIT file</label>
+            <label class="form-label" for="activity-file">FIT files</label>
             <input
               class="form-control"
               id="activity-file"
               type="file"
               accept=".fit"
+              multiple
               required
               [disabled]="isUploading()"
-              (change)="selectFile($event)"
+              (change)="selectFiles($event)"
             />
+            @if (selectedFiles().length) {
+              <div class="form-text">
+                {{ selectedFiles().length }}
+                {{ selectedFiles().length === 1 ? 'file' : 'files' }} selected
+              </div>
+            }
             @if (uploadError(); as error) {
               <div class="alert alert-danger mt-3 mb-0" role="alert">{{ error }}</div>
             }
@@ -101,9 +108,9 @@
             <button
               class="btn btn-primary"
               type="submit"
-              [disabled]="!selectedFile() || uploadError() || isUploading()"
+              [disabled]="!selectedFiles().length || uploadError() || isUploading()"
             >
-              {{ isUploading() ? 'Uploading…' : 'Upload' }}
+              {{ isUploading() ? 'Uploading…' : 'Upload selected files' }}
             </button>
           </div>
         </form>

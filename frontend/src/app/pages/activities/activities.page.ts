@@ -3,7 +3,7 @@ import { Component, DestroyRef, HostListener, inject, signal } from '@angular/co
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { DurationPipe } from '../../pipes/duration.pipe';
-import { finalize, startWith, Subject, switchMap } from 'rxjs';
+import { finalize, forkJoin, startWith, Subject, switchMap } from 'rxjs';
 import { ActivityService } from '../../services/activity.service';
 
 @Component({
@@ -22,12 +22,12 @@ export class ActivitiesPage {
     switchMap(() => this.activityService.getAll()),
   );
   readonly isUploadModalOpen = signal(false);
-  readonly selectedFile = signal<File | null>(null);
+  readonly selectedFiles = signal<File[]>([]);
   readonly isUploading = signal(false);
   readonly uploadError = signal<string | null>(null);
 
   openUploadModal(): void {
-    this.selectedFile.set(null);
+    this.selectedFiles.set([]);
     this.uploadError.set(null);
     this.isUploadModalOpen.set(true);
   }
@@ -38,27 +38,25 @@ export class ActivitiesPage {
     }
   }
 
-  selectFile(event: Event): void {
+  selectFiles(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.item(0) ?? null;
+    const files = Array.from(input.files ?? []);
+    const hasInvalidFile = files.some((file) => !file.name.toLowerCase().endsWith('.fit'));
 
-    this.selectedFile.set(file);
-    this.uploadError.set(
-      file && !file.name.toLowerCase().endsWith('.fit') ? 'Please select a .fit file.' : null,
-    );
+    this.selectedFiles.set(files);
+    this.uploadError.set(hasInvalidFile ? 'Please select only .fit files.' : null);
   }
 
-  uploadActivity(): void {
-    const file = this.selectedFile();
-    if (!file || !file.name.toLowerCase().endsWith('.fit')) {
-      this.uploadError.set('Please select a .fit file.');
+  uploadActivities(): void {
+    const files = this.selectedFiles();
+    if (!files.length || files.some((file) => !file.name.toLowerCase().endsWith('.fit'))) {
+      this.uploadError.set('Please select one or more .fit files.');
       return;
     }
 
     this.isUploading.set(true);
     this.uploadError.set(null);
-    this.activityService
-      .upload(file)
+    forkJoin(files.map((file) => this.activityService.upload(file)))
       .pipe(
         finalize(() => this.isUploading.set(false)),
         takeUntilDestroyed(this.destroyRef),
@@ -68,7 +66,8 @@ export class ActivitiesPage {
           this.isUploadModalOpen.set(false);
           this.refreshActivities$.next();
         },
-        error: () => this.uploadError.set('The activity could not be uploaded. Please try again.'),
+        error: () =>
+          this.uploadError.set('The activities could not all be uploaded. Please try again.'),
       });
   }
 
