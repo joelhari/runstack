@@ -129,6 +129,7 @@ class ActivityServiceTests {
         assertThat(newRecord.getActivity()).isSameAs(existing);
         assertThat(result.getLaps()).containsExactly(newLap);
         assertThat(newLap.getActivity()).isSameAs(existing);
+        verify(repository).flush();
         verify(repository).save(existing);
     }
 }

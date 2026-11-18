@@ -62,13 +62,19 @@ public class ActivityService {
     }
 
     private Activity update(Activity existing, Activity parsed) {
+        List<ActivityLap> newLaps = List.copyOf(parsed.getLaps());
+
         existing.setName(parsed.getName());
         existing.setDate(parsed.getDate());
         existing.setDistance(parsed.getDistance());
         existing.setDuration(parsed.getDuration());
         existing.setAveragePace(parsed.getAveragePace());
         existing.replaceRecords(parsed.getRecords());
-        existing.replaceLaps(parsed.getLaps());
+
+        existing.clearLaps();
+        activityRepository.flush();
+        newLaps.forEach(existing::addLap);
+
         return activityRepository.save(existing);
     }
 

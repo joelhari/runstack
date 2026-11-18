@@ -136,8 +136,7 @@ public class Activity {
         laps.add(lap);
         lap.setActivity(this);
     }
-    public void replaceLaps(List<ActivityLap> newLaps) {
+    public void clearLaps() {
         laps.clear();
-        newLaps.forEach(this::addLap);
     }
 }
