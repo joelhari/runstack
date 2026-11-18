@@ -1,0 +1,48 @@
+<header class="border-bottom bg-body-tertiary">
+  <div class="container py-4">
+    <h1 class="mb-0">Activities</h1>
+  </div>
+</header>
+
+<main class="container py-4">
+  @if (activities$ | async; as activities) {
+    <ul class="activity-list list-group" aria-label="Activities">
+      @for (activity of activities; track activity.id) {
+        <li class="list-group-item p-0">
+          <a
+            class="activity-link d-flex flex-column flex-sm-row justify-content-between gap-2 p-3 text-body text-decoration-none"
+            [routerLink]="['/activity', activity.id]"
+          >
+            <div>
+              <h2 class="h5 mb-1">{{ activity.name }}</h2>
+              <time class="text-body-secondary" [attr.datetime]="activity.date">
+                {{ activity.date | date: 'mediumDate' }}
+              </time>
+            </div>
+
+            <dl class="activity-details d-flex flex-wrap gap-4 mb-0">
+              <div>
+                <dt>Distance</dt>
+                <dd class="mb-0">{{ activity.distance | number: '1.0-2' }} km</dd>
+              </div>
+              <div>
+                <dt>Duration</dt>
+                <dd class="mb-0">{{ activity.duration }}</dd>
+              </div>
+              <div>
+                <dt>Average pace</dt>
+                <dd class="mb-0">{{ activity.averagePace ?? '—' }}</dd>
+              </div>
+            </dl>
+          </a>
+        </li>
+      } @empty {
+        <li class="list-group-item py-4 text-center text-body-secondary">
+          No activities yet.
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="text-body-secondary" role="status">Loading activities…</p>
+  }
+</main>

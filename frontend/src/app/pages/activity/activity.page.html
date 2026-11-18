@@ -1,0 +1,32 @@
+@if (activity$ | async; as activity) {
+  <header class="border-bottom bg-body-tertiary">
+    <div class="container py-4">
+      <a class="d-inline-block mb-2" routerLink="/activities">← All activities</a>
+      <h1 class="mb-1">{{ activity.name }}</h1>
+      <time class="text-body-secondary" [attr.datetime]="activity.date">
+        {{ activity.date | date: 'mediumDate' }}
+      </time>
+    </div>
+  </header>
+
+  <main class="container py-4">
+    <dl class="activity-details row g-4 mb-0">
+      <div class="col-12 col-sm-4">
+        <dt>Distance</dt>
+        <dd>{{ activity.distance | number: '1.0-2' }} km</dd>
+      </div>
+      <div class="col-12 col-sm-4">
+        <dt>Duration</dt>
+        <dd>{{ activity.duration }}</dd>
+      </div>
+      <div class="col-12 col-sm-4">
+        <dt>Average pace</dt>
+        <dd>{{ activity.averagePace ?? '—' }}</dd>
+      </div>
+    </dl>
+  </main>
+} @else {
+  <main class="container py-4">
+    <p class="text-body-secondary" role="status">Loading activity…</p>
+  </main>
+}

@@ -1,0 +1,24 @@
+.activity-list {
+  max-width: 64rem;
+}
+
+.activity-link:hover,
+.activity-link:focus-visible {
+  background-color: var(--bs-tertiary-bg);
+}
+
+.activity-details {
+  min-width: min(100%, 28rem);
+}
+
+.activity-details > div {
+  min-width: 7rem;
+}
+
+.activity-details dt {
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}

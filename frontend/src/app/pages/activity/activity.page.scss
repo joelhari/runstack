@@ -1,0 +1,16 @@
+.activity-details {
+  max-width: 48rem;
+}
+
+.activity-details dt {
+  color: var(--bs-secondary-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.activity-details dd {
+  font-size: 1.25rem;
+  margin-bottom: 0;
+}
