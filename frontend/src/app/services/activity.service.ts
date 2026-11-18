@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Activity } from '../models/activity';
+import { ActivityLap } from '../models/activity-lap';
 
 @Service()
 export class ActivityService {
@@ -13,6 +14,10 @@ export class ActivityService {
 
   getById(id: number): Observable<Activity> {
     return this.http.get<Activity>(`http://localhost:8080/api/v1/activity/${id}`);
+  }
+
+  getLaps(id: number): Observable<ActivityLap[]> {
+    return this.http.get<ActivityLap[]>(`http://localhost:8080/api/v1/activity/${id}/laps`);
   }
 
   upload(file: File): Observable<Activity> {

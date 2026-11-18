@@ -29,6 +29,7 @@ describe('ActivityPage', () => {
                 duration: '00:30:00',
                 averagePace: '06:00',
               }),
+            getLaps: () => of([]),
           },
         },
       ],

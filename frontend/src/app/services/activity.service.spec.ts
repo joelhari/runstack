@@ -48,4 +48,12 @@ describe('ActivityService', () => {
     expect(request.request.method).toBe('GET');
     request.flush({});
   });
+
+  it('gets the laps for an activity from the laps endpoint', () => {
+    service.getLaps(42).subscribe();
+
+    const request = httpTesting.expectOne('http://localhost:8080/api/v1/activity/42/laps');
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
+  });
 });
