@@ -15,7 +15,7 @@ describe('ActivitiesPage', () => {
         provideRouter([]),
         {
           provide: ActivityService,
-          useValue: { getAll: () => of([]) },
+          useValue: { getAll: () => of([]), upload: () => of({}) },
         },
       ],
     }).compileComponents();
