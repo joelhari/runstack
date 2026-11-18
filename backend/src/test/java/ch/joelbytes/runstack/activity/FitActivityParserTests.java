@@ -9,6 +9,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 import com.garmin.fit.DateTime;
+import com.garmin.fit.LapMesg;
 import com.garmin.fit.RecordMesg;
 import com.garmin.fit.SessionMesg;
 import com.garmin.fit.Sport;
@@ -64,5 +65,48 @@ class FitActivityParserTests {
         assertThat(result.getVerticalOscillation()).isEqualTo(82F);
         assertThat(result.getGroundContactTimeMs()).isEqualTo(242.5F);
         assertThat(result.getRespirationRate()).isEqualTo(34);
+    }
+
+    @Test
+    void mapsLapSummary() {
+        LapMesg message = new LapMesg();
+        message.setMessageIndex(2);
+        message.setStartTime(DateTime.from(Instant.parse("2026-11-17T07:40:00Z")));
+        message.setTimestamp(DateTime.from(Instant.parse("2026-11-17T07:45:00Z")));
+        message.setTotalElapsedTime(310F);
+        message.setTotalTimerTime(300F);
+        message.setTotalDistance(1_000F);
+        message.setAvgSpeed(3.333F);
+        message.setMaxSpeed(4.5F);
+        message.setAvgHeartRate((short) 150);
+        message.setMaxHeartRate((short) 170);
+        message.setAvgCadence((short) 85);
+        message.setMaxCadence((short) 92);
+        message.setAvgPower(260);
+        message.setMaxPower(410);
+        message.setTotalCalories(75);
+        message.setTotalAscent(20);
+        message.setTotalDescent(15);
+
+        ActivityLap result = new FitActivityParser().fromLap(message);
+
+        assertThat(result.getLapIndex()).isEqualTo(2);
+        assertThat(result.getStartedAt()).isEqualTo(Instant.parse("2026-11-17T07:40:00Z"));
+        assertThat(result.getEndedAt()).isEqualTo(Instant.parse("2026-11-17T07:45:00Z"));
+        assertThat(result.getElapsedDuration()).isEqualTo(Duration.ofSeconds(310));
+        assertThat(result.getTimerDuration()).isEqualTo(Duration.ofMinutes(5));
+        assertThat(result.getDistance()).isEqualTo(1_000F);
+        assertThat(result.getAveragePace()).isEqualTo(Duration.ofMinutes(5));
+        assertThat(result.getAverageSpeed()).isEqualTo(3.333F);
+        assertThat(result.getMaximumSpeed()).isEqualTo(4.5F);
+        assertThat(result.getAverageHeartRate()).isEqualTo(150);
+        assertThat(result.getMaximumHeartRate()).isEqualTo(170);
+        assertThat(result.getAverageCadence()).isEqualTo(85);
+        assertThat(result.getMaximumCadence()).isEqualTo(92);
+        assertThat(result.getAveragePower()).isEqualTo(260);
+        assertThat(result.getMaximumPower()).isEqualTo(410);
+        assertThat(result.getCalories()).isEqualTo(75);
+        assertThat(result.getAscent()).isEqualTo(20);
+        assertThat(result.getDescent()).isEqualTo(15);
     }
 }

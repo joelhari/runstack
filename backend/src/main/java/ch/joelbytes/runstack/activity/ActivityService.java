@@ -63,6 +63,7 @@ public class ActivityService {
         existing.setDuration(parsed.getDuration());
         existing.setAveragePace(parsed.getAveragePace());
         existing.replaceRecords(parsed.getRecords());
+        existing.replaceLaps(parsed.getLaps());
         return activityRepository.save(existing);
     }
 

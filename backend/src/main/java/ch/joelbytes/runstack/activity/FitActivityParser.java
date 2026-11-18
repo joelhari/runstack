@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.garmin.fit.FitRuntimeException;
+import com.garmin.fit.LapMesg;
 import com.garmin.fit.MesgBroadcaster;
 import com.garmin.fit.RecordMesg;
 import com.garmin.fit.SessionMesg;
@@ -20,11 +21,13 @@ public class FitActivityParser {
     public Activity parse(InputStream inputStream) {
         List<SessionMesg> sessions = new ArrayList<>();
         List<ActivityRecord> records = new ArrayList<>();
+        List<ActivityLap> laps = new ArrayList<>();
 
         try {
             MesgBroadcaster broadcaster = new MesgBroadcaster();
             broadcaster.addListener((SessionMesg session) -> sessions.add(session));
             broadcaster.addListener((RecordMesg record) -> records.add(fromRecord(record)));
+            broadcaster.addListener((LapMesg lap) -> laps.add(fromLap(lap)));
             broadcaster.run(inputStream);
         } catch (FitRuntimeException exception) {
             throw new InvalidFitFileException("The uploaded file is not a valid FIT file", exception);
@@ -36,6 +39,7 @@ public class FitActivityParser {
 
         Activity activity = fromSession(sessions.getFirst());
         records.forEach(activity::addRecord);
+        laps.forEach(activity::addLap);
         return activity;
     }
 
@@ -81,6 +85,39 @@ public class FitActivityParser {
         return record;
     }
 
+    ActivityLap fromLap(LapMesg message) {
+        ActivityLap lap = new ActivityLap();
+        lap.setLapIndex(message.getMessageIndex());
+        if (message.getStartTime() != null) {
+            lap.setStartedAt(message.getStartTime().getInstant());
+        }
+        if (message.getTimestamp() != null) {
+            lap.setEndedAt(message.getTimestamp().getInstant());
+        }
+        lap.setElapsedDuration(durationFromSeconds(message.getTotalElapsedTime()));
+        lap.setTimerDuration(durationFromSeconds(message.getTotalTimerTime()));
+        lap.setDistance(message.getTotalDistance());
+        lap.setAverageSpeed(message.getAvgSpeed());
+        lap.setMaximumSpeed(message.getMaxSpeed());
+        lap.setAverageHeartRate(toInteger(message.getAvgHeartRate()));
+        lap.setMaximumHeartRate(toInteger(message.getMaxHeartRate()));
+        lap.setAverageCadence(toInteger(message.getAvgCadence()));
+        lap.setMaximumCadence(toInteger(message.getMaxCadence()));
+        lap.setAveragePower(message.getAvgPower());
+        lap.setMaximumPower(message.getMaxPower());
+        lap.setCalories(message.getTotalCalories());
+        lap.setAscent(message.getTotalAscent());
+        lap.setDescent(message.getTotalDescent());
+
+        if (message.getTotalTimerTime() != null
+                && message.getTotalDistance() != null
+                && message.getTotalDistance() > 0) {
+            lap.setAveragePace(Duration.ofMillis(Math.round(
+                    message.getTotalTimerTime() * 1_000_000D / message.getTotalDistance())));
+        }
+        return lap;
+    }
+
     private Double toDegrees(Integer semicircles) {
         return semicircles == null ? null : semicircles * SEMICIRCLES_TO_DEGREES;
     }
@@ -89,8 +126,8 @@ public class FitActivityParser {
         return value == null ? null : value.intValue();
     }
 
-    private Duration durationFromSeconds(float seconds) {
-        return Duration.ofMillis(Math.round(seconds * 1_000));
+    private Duration durationFromSeconds(Float seconds) {
+        return seconds == null ? null : Duration.ofMillis(Math.round(seconds * 1_000));
     }
 
     private String defaultName(SessionMesg session) {

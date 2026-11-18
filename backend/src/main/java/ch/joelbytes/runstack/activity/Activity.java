@@ -59,6 +59,9 @@ public class Activity {
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ActivityRecord> records = new ArrayList<>();
 
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ActivityLap> laps = new ArrayList<>();
+
     public Long getId() {
         return id;
     }
@@ -123,5 +126,16 @@ public class Activity {
     public void replaceRecords(List<ActivityRecord> newRecords) {
         records.clear();
         newRecords.forEach(this::addRecord);
+    }
+    public List<ActivityLap> getLaps() {
+        return laps;
+    }
+    public void addLap(ActivityLap lap) {
+        laps.add(lap);
+        lap.setActivity(this);
+    }
+    public void replaceLaps(List<ActivityLap> newLaps) {
+        laps.clear();
+        newLaps.forEach(this::addLap);
     }
 }

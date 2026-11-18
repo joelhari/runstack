@@ -86,6 +86,9 @@ class ActivityServiceTests {
         existing.setFitFileHash("039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81");
         existing.setName("Old name");
         existing.addRecord(new ActivityRecord());
+        ActivityLap oldLap = new ActivityLap();
+        oldLap.setLapIndex(0);
+        existing.addLap(oldLap);
 
         Activity parsed = new Activity();
         parsed.setName("Updated name");
@@ -93,6 +96,9 @@ class ActivityServiceTests {
         ActivityRecord newRecord = new ActivityRecord();
         newRecord.setHeartRate(155);
         parsed.addRecord(newRecord);
+        ActivityLap newLap = new ActivityLap();
+        newLap.setLapIndex(1);
+        parsed.addLap(newLap);
 
         when(parser.parse(any(InputStream.class))).thenReturn(parsed);
         when(repository.findByFitFileHash(existing.getFitFileHash())).thenReturn(Optional.of(existing));
@@ -106,6 +112,8 @@ class ActivityServiceTests {
         assertThat(result.getDistance()).isEqualTo(10F);
         assertThat(result.getRecords()).containsExactly(newRecord);
         assertThat(newRecord.getActivity()).isSameAs(existing);
+        assertThat(result.getLaps()).containsExactly(newLap);
+        assertThat(newLap.getActivity()).isSameAs(existing);
         verify(repository).save(existing);
     }
 }
