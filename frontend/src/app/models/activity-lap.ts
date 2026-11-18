@@ -3,10 +3,10 @@ export interface ActivityLap {
   lapIndex: number;
   startedAt: string | null;
   endedAt: string | null;
-  elapsedDuration: string | null;
-  timerDuration: string | null;
+  elapsedDuration: number | null;
+  timerDuration: number | null;
   distance: number | null;
-  averagePace: string | null;
+  averagePace: number | null;
   averageSpeed: number | null;
   maximumSpeed: number | null;
   averageHeartRate: number | null;

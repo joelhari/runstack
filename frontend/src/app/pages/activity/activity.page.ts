@@ -2,10 +2,12 @@ import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map, shareReplay, switchMap } from 'rxjs';
+import { DurationPipe } from '../../pipes/duration.pipe';
+import { KilometersPipe } from '../../pipes/kilometers.pipe';
 import { ActivityService } from '../../services/activity.service';
 
 @Component({
-  imports: [AsyncPipe, DatePipe, DecimalPipe, RouterLink],
+  imports: [AsyncPipe, DatePipe, DecimalPipe, DurationPipe, KilometersPipe, RouterLink],
   selector: 'app-activity',
   styleUrl: './activity.page.scss',
   templateUrl: './activity.page.html',

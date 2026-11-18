@@ -17,11 +17,11 @@
       </div>
       <div class="col-12 col-sm-4">
         <dt>Duration</dt>
-        <dd>{{ activity.duration }}</dd>
+        <dd>{{ activity.duration | duration: true }}</dd>
       </div>
       <div class="col-12 col-sm-4">
         <dt>Average pace</dt>
-        <dd>{{ activity.averagePace ?? '—' }}</dd>
+        <dd>{{ activity.averagePace | duration }}</dd>
       </div>
     </dl>
 
@@ -50,14 +50,10 @@
                   <tr>
                     <th scope="row">{{ lap.lapIndex + 1 }}</th>
                     <td>
-                      {{
-                        lap.distance === null
-                          ? '—'
-                          : (lap.distance / 1000 | number: '1.0-2') + ' km'
-                      }}
+                      {{ lap.distance | kilometers: 2 }}
                     </td>
-                    <td>{{ lap.timerDuration ?? lap.elapsedDuration ?? '—' }}</td>
-                    <td>{{ lap.averagePace ?? '—' }}</td>
+                    <td>{{ lap.timerDuration ?? lap.elapsedDuration | duration }}</td>
+                    <td>{{ lap.averagePace | duration }}</td>
                     <td>
                       {{ lap.averageHeartRate === null ? '—' : lap.averageHeartRate + ' bpm' }}
                     </td>

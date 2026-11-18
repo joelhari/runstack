@@ -2,11 +2,12 @@ import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, DestroyRef, HostListener, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { DurationPipe } from '../../pipes/duration.pipe';
 import { finalize, startWith, Subject, switchMap } from 'rxjs';
 import { ActivityService } from '../../services/activity.service';
 
 @Component({
-  imports: [AsyncPipe, DatePipe, DecimalPipe, RouterLink],
+  imports: [AsyncPipe, DatePipe, DecimalPipe, DurationPipe, RouterLink],
   selector: 'app-activities',
   styleUrl: './activities.page.scss',
   templateUrl: './activities.page.html',

@@ -32,11 +32,11 @@
               </div>
               <div>
                 <dt>Duration</dt>
-                <dd class="mb-0">{{ activity.duration }}</dd>
+                <dd class="mb-0">{{ activity.duration | duration: true }}</dd>
               </div>
               <div>
                 <dt>Average pace</dt>
-                <dd class="mb-0">{{ activity.averagePace ?? '—' }}</dd>
+                <dd class="mb-0">{{ activity.averagePace | duration }}</dd>
               </div>
             </dl>
           </a>

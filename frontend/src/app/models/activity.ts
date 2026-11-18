@@ -3,6 +3,6 @@ export interface Activity {
   name: string;
   date: string;
   distance: number;
-  duration: string;
-  averagePace: string | null;
+  duration: number;
+  averagePace: number | null;
 }
