@@ -1,31 +1,27 @@
-import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map, shareReplay, switchMap } from 'rxjs';
-import { BarChart } from '../../components/bar-chart/bar-chart';
-import { ActivityLap } from '../../models/activity-lap';
-import { DurationPipe } from '../../pipes/duration.pipe';
-import { KilometersPipe } from '../../pipes/kilometers.pipe';
 import { ActivityService } from '../../services/activity.service';
+import { Details } from './details/details';
+import { Laps } from './laps/laps';
 
-interface LapChartRecord {
-  distance: number;
-  lapDistance: number;
-  pace: number;
-}
+type AnalysisTab = 'details' | 'laps';
 
 @Component({
-  imports: [AsyncPipe, BarChart, DatePipe, DecimalPipe, DurationPipe, KilometersPipe, RouterLink],
+  imports: [AsyncPipe, DatePipe, Details, Laps, RouterLink],
   selector: 'app-activity',
   styleUrl: './activity.page.scss',
   templateUrl: './activity.page.html',
 })
 export class ActivityPage {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly activityService = inject(ActivityService);
 
-  protected readonly durationPipe = new DurationPipe();
-  protected readonly kilometersPipe = new KilometersPipe();
+  protected readonly selectedAnalysisTab = signal<AnalysisTab>('details');
 
   private readonly activityId$ = this.route.paramMap.pipe(
     map((params) => Number(params.get('id'))),
@@ -33,46 +29,25 @@ export class ActivityPage {
   );
 
   readonly activity$ = this.activityId$.pipe(switchMap((id) => this.activityService.getById(id)));
-
   readonly laps$ = this.activityId$.pipe(switchMap((id) => this.activityService.getLaps(id)));
 
-  protected lapChartRecords(laps: readonly ActivityLap[]): LapChartRecord[] {
-    let distance = 0;
-    return laps.map((lap) => {
-      const lapDistance = lap.distance ?? 0;
-      const record = {
-        distance,
-        lapDistance,
-        pace: lap.averagePace ?? 0,
-      };
-      distance += lapDistance;
-      return record;
+  constructor() {
+    this.route.fragment.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((fragment) => {
+      if (fragment === 'details' || fragment === 'laps') {
+        this.selectedAnalysisTab.set(fragment);
+      } else {
+        this.selectAnalysisTab('details', true);
+      }
     });
   }
 
-  protected lapChartMaxDistance(laps: readonly ActivityLap[]): number {
-    return laps.reduce((total, lap) => total + (lap.distance ?? 0), 0);
-  }
-
-  protected lapChartMinPace(laps: readonly ActivityLap[]): number {
-    const paces = this.lapPaces(laps);
-    if (!paces.length) {
-      return 10_000;
-    }
-
-    return Math.max(...paces) + 60_000;
-  }
-
-  protected lapChartMaxPace(laps: readonly ActivityLap[]): number {
-    const paces = this.lapPaces(laps);
-    if (!paces.length) {
-      return 0;
-    }
-
-    return Math.max(0, Math.min(...paces) - 10_000);
-  }
-
-  private lapPaces(laps: readonly ActivityLap[]): number[] {
-    return laps.flatMap((lap) => (lap.averagePace === null ? [] : [lap.averagePace]));
+  protected selectAnalysisTab(tab: AnalysisTab, replaceUrl = false): void {
+    this.selectedAnalysisTab.set(tab);
+    void this.router.navigate([], {
+      fragment: tab,
+      queryParamsHandling: 'preserve',
+      relativeTo: this.route,
+      replaceUrl,
+    });
   }
 }

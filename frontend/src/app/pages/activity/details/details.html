@@ -1,0 +1,14 @@
+<dl class="activity-details row g-4 mb-0">
+  <div class="col-12 col-sm-4">
+    <dt>Distance</dt>
+    <dd>{{ activity().distance | number: '1.0-2' }} km</dd>
+  </div>
+  <div class="col-12 col-sm-4">
+    <dt>Duration</dt>
+    <dd>{{ activity().duration | duration: true }}</dd>
+  </div>
+  <div class="col-12 col-sm-4">
+    <dt>Average pace</dt>
+    <dd>{{ activity().averagePace | duration }}</dd>
+  </div>
+</dl>

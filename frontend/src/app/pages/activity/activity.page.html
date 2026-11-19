@@ -1,5 +1,5 @@
 @if (activity$ | async; as activity) {
-  <header class="border-bottom bg-body-tertiary">
+  <header class="border-bottom bg-body-tertiary flex-grow-0 flex-shrink-0">
     <div class="container py-4">
       <a class="d-inline-block mb-2" routerLink="/activities">← All activities</a>
       <h1 class="mb-1">{{ activity.name }}</h1>
@@ -9,87 +9,62 @@
     </div>
   </header>
 
-  <main class="container py-4">
-    <dl class="activity-details row g-4 mb-0">
-      <div class="col-12 col-sm-4">
-        <dt>Distance</dt>
-        <dd>{{ activity.distance | number: '1.0-2' }} km</dd>
+  <main class="container pb-4 d-flex flex-column flex-fill min-h-0 overflow-hidden">
+    <section
+      class="analysis-section d-flex flex-column flex-fill min-h-0"
+      aria-label="Activity analysis"
+    >
+      <div
+        class="nav nav-tabs flex-grow-0 flex-shrink-0"
+        role="tablist"
+        aria-label="Analysis views"
+      >
+        <button
+          id="details-tab"
+          type="button"
+          class="nav-link"
+          role="tab"
+          aria-controls="details-panel"
+          [class.active]="selectedAnalysisTab() === 'details'"
+          [attr.aria-selected]="selectedAnalysisTab() === 'details'"
+          (click)="selectAnalysisTab('details')"
+        >
+          Details
+        </button>
+        <button
+          id="laps-tab"
+          type="button"
+          class="nav-link"
+          role="tab"
+          aria-controls="laps-panel"
+          [class.active]="selectedAnalysisTab() === 'laps'"
+          [attr.aria-selected]="selectedAnalysisTab() === 'laps'"
+          (click)="selectAnalysisTab('laps')"
+        >
+          Laps
+        </button>
       </div>
-      <div class="col-12 col-sm-4">
-        <dt>Duration</dt>
-        <dd>{{ activity.duration | duration: true }}</dd>
-      </div>
-      <div class="col-12 col-sm-4">
-        <dt>Average pace</dt>
-        <dd>{{ activity.averagePace | duration }}</dd>
-      </div>
-    </dl>
 
-    <section class="mt-5" aria-labelledby="laps-title">
-      <h2 class="h3 mb-3" id="laps-title">Laps</h2>
-
-      @if (laps$ | async; as laps) {
-        @if (laps.length) {
-          <figure class="lap-chart mb-5">
-            <figcaption class="fw-semibold mb-3">Pace by lap distance</figcaption>
-            <app-bar-chart
-              [records]="lapChartRecords(laps)"
-              xField="distance"
-              yField="pace"
-              barWidthField="lapDistance"
-              [minX]="0"
-              [maxX]="lapChartMaxDistance(laps)"
-              [xAxisPipe]="kilometersPipe"
-              [xAxisPipeArgs]="[1]"
-              [minY]="lapChartMinPace(laps)"
-              [maxY]="lapChartMaxPace(laps)"
-              [yAxisPipe]="durationPipe"
-            />
-          </figure>
-
-          <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle">
-              <thead>
-                <tr>
-                  <th scope="col">Lap</th>
-                  <th scope="col">Distance</th>
-                  <th scope="col">Time</th>
-                  <th scope="col">Average pace</th>
-                  <th scope="col">Heart rate</th>
-                  <th scope="col">Cadence</th>
-                  <th scope="col">Power</th>
-                  <th scope="col">Ascent</th>
-                  <th scope="col">Descent</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (lap of laps; track lap.id) {
-                  <tr>
-                    <th scope="row">{{ lap.lapIndex + 1 }}</th>
-                    <td>
-                      {{ lap.distance | kilometers: 2 }}
-                    </td>
-                    <td>{{ lap.timerDuration ?? lap.elapsedDuration | duration }}</td>
-                    <td>{{ lap.averagePace | duration }}</td>
-                    <td>
-                      {{ lap.averageHeartRate === null ? '—' : lap.averageHeartRate + ' bpm' }}
-                    </td>
-                    <td>
-                      {{ lap.averageCadence === null ? '—' : lap.averageCadence + ' spm' }}
-                    </td>
-                    <td>{{ lap.averagePower === null ? '—' : lap.averagePower + ' W' }}</td>
-                    <td>{{ lap.ascent === null ? '—' : lap.ascent + ' m' }}</td>
-                    <td>{{ lap.descent === null ? '—' : lap.descent + ' m' }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        } @else {
-          <p class="text-body-secondary">No lap data is available for this activity.</p>
-        }
-      } @else {
-        <p class="text-body-secondary" role="status">Loading laps…</p>
+      @if (selectedAnalysisTab() === 'details') {
+        <div
+          id="details-panel"
+          class="d-flex flex-fill flex-column min-h-0 pt-3"
+          role="tabpanel"
+          aria-labelledby="details-tab"
+          tabindex="0"
+        >
+          <app-details class="w-100 h-100" [activity]="activity" />
+        </div>
+      } @else if (selectedAnalysisTab() === 'laps') {
+        <div
+          id="laps-panel"
+          class="d-flex flex-fill flex-column min-h-0 pt-3"
+          role="tabpanel"
+          aria-labelledby="laps-tab"
+          tabindex="0"
+        >
+          <app-laps class="w-100 h-100" [laps]="laps$ | async" />
+        </div>
       }
     </section>
   </main>

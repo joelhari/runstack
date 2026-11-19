@@ -1,25 +1,31 @@
-.activity-details {
-  max-width: 48rem;
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
 }
 
-.activity-details dt {
-  color: var(--bs-secondary-color);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.analysis-section .nav-link {
+  border: 0;
+  border-radius: 0;
+  transition:
+    background-color 120ms ease-in-out,
+    color 120ms ease-in-out;
 }
 
-.activity-details dd {
-  font-size: 1.25rem;
-  margin-bottom: 0;
+.analysis-section .nav-link:hover,
+.analysis-section .nav-link:focus-visible {
+  background-color: rgba(var(--bs-primary-rgb), 0.15);
+  color: var(--bs-primary);
 }
 
-table {
-  white-space: nowrap;
+.analysis-section .nav-link.active {
+  background-color: var(--bs-primary);
+  color: var(--bs-white);
 }
 
-.lap-chart {
-  height: 30vh;
-  min-height: 15rem;
+.analysis-section .nav-link.active:hover,
+.analysis-section .nav-link.active:focus-visible {
+  background-color: var(--bs-primary);
+  color: var(--bs-white);
 }

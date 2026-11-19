@@ -1,11 +1,12 @@
-import { Component, computed, input, numberAttribute, PipeTransform } from '@angular/core';
+import { Component, computed, input, numberAttribute, output, PipeTransform } from '@angular/core';
 
-const NUM_VERTICAL_GRID_LINES: number = 5
-const NUM_HORIZONTAL_GRID_LINES: number = 5
+const NUM_VERTICAL_GRID_LINES: number = 5;
+const NUM_HORIZONTAL_GRID_LINES: number = 5;
 
 interface ChartBar {
   height: number;
   left: number;
+  record: object;
   value: string;
   width: number;
 }
@@ -36,6 +37,9 @@ export class BarChart {
   readonly yAxisPipe = input<PipeTransform | null>(null);
   readonly xAxisPipeArgs = input<readonly unknown[]>([]);
   readonly yAxisPipeArgs = input<readonly unknown[]>([]);
+  readonly highlightedBarIndex = input<number | null>(null);
+  readonly barHover = output<object>();
+  readonly barHoverEnd = output<object>();
 
   protected readonly verticalGridLines = computed(() =>
     this.gridLines(
@@ -79,6 +83,7 @@ export class BarChart {
       return {
         height,
         left,
+        record,
         value: this.formatLabel(yValue, this.yAxisPipe(), this.yAxisPipeArgs()),
         width,
       };

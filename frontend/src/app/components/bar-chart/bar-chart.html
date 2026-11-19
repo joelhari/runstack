@@ -1,8 +1,11 @@
-<div class="d-flex flex-column w-100 h-100" role="img" aria-label="Bar chart">
+<div class="d-flex flex-column w-100 h-100" role="group" aria-label="Bar chart">
   <div class="d-flex flex-row flex-grow-1 flex-shrink-1">
     <div class="bar-chart-left position-relative flex-grow-0 flex-shrink-0">
       @for (line of horizontalGridLines(); track line.position) {
-        <span class="bar-chart-label position-absolute translate-middle-y text-end start-0 end-0 pe-2" [style.top.%]="line.position">
+        <span
+          class="bar-chart-label position-absolute translate-middle-y text-end start-0 end-0 pe-2"
+          [style.top.%]="line.position"
+        >
           {{ line.label }}
         </span>
       }
@@ -22,11 +25,14 @@
       }
       @for (bar of bars(); track $index) {
         <div
-          class="position-absolute bottom-0 z-2"
+          class="bar-chart-bar-wrapper position-absolute bottom-0 z-2"
+          [class.bar-chart-bar-wrapper--highlighted]="highlightedBarIndex() === $index"
           [style.height.%]="bar.height"
           [style.left.%]="bar.left"
           [style.width.%]="bar.width"
           [title]="bar.value"
+          (mouseenter)="barHover.emit(bar.record)"
+          (mouseleave)="barHoverEnd.emit(bar.record)"
         >
           <div class="bar-chart-bar h-100 bg-primary rounded-top-1"></div>
         </div>
@@ -37,7 +43,10 @@
     <div class="bar-chart-left flex-grow-0 flex-shrink-0"></div>
     <div class="position-relative flex-grow-1 flex-shrink-1">
       @for (line of verticalGridLines(); track line.position) {
-        <span class="bar-chart-label position-absolute translate-middle-x" [style.left.%]="line.position">
+        <span
+          class="bar-chart-label position-absolute translate-middle-x"
+          [style.left.%]="line.position"
+        >
           {{ line.label }}
         </span>
       }

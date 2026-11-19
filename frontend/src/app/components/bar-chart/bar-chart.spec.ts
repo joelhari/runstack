@@ -95,6 +95,54 @@ describe('BarChart', () => {
     expect(bar.title).toBe('50');
   });
 
+  it('emits the source record when a bar is hovered', () => {
+    const record = { distance: 25, pace: 50, lapDistance: 20 };
+    let emittedRecord: object | undefined;
+    component.barHover.subscribe((value) => (emittedRecord = value));
+    fixture.componentRef.setInput('records', [record]);
+    fixture.componentRef.setInput('xField', 'distance');
+    fixture.componentRef.setInput('yField', 'pace');
+    fixture.componentRef.setInput('barWidthField', 'lapDistance');
+    fixture.detectChanges();
+
+    const bar = barContainers(fixture.nativeElement as HTMLElement)[0];
+    bar.dispatchEvent(new MouseEvent('mouseenter'));
+
+    expect(emittedRecord).toBe(record);
+  });
+
+  it('emits the source record when a bar is no longer hovered', () => {
+    const record = { distance: 25, pace: 50, lapDistance: 20 };
+    let emittedRecord: object | undefined;
+    component.barHoverEnd.subscribe((value) => (emittedRecord = value));
+    fixture.componentRef.setInput('records', [record]);
+    fixture.componentRef.setInput('xField', 'distance');
+    fixture.componentRef.setInput('yField', 'pace');
+    fixture.componentRef.setInput('barWidthField', 'lapDistance');
+    fixture.detectChanges();
+
+    const bar = barContainers(fixture.nativeElement as HTMLElement)[0];
+    bar.dispatchEvent(new MouseEvent('mouseleave'));
+
+    expect(emittedRecord).toBe(record);
+  });
+
+  it('highlights the bar selected through the highlighted index input', () => {
+    fixture.componentRef.setInput('records', [
+      { x: 0, y: 25, width: 10 },
+      { x: 10, y: 50, width: 10 },
+    ]);
+    fixture.componentRef.setInput('xField', 'x');
+    fixture.componentRef.setInput('yField', 'y');
+    fixture.componentRef.setInput('barWidthField', 'width');
+    fixture.componentRef.setInput('highlightedBarIndex', 1);
+    fixture.detectChanges();
+
+    const bars = barContainers(fixture.nativeElement as HTMLElement);
+    expect(bars[0].classList.contains('bar-chart-bar-wrapper--highlighted')).toBe(false);
+    expect(bars[1].classList.contains('bar-chart-bar-wrapper--highlighted')).toBe(true);
+  });
+
   it('places minY at the bottom and maxY at the top', () => {
     fixture.componentRef.setInput('records', [{ x: 0, y: 25, width: 10 }]);
     fixture.componentRef.setInput('xField', 'x');
