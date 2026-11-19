@@ -39,12 +39,10 @@
               barWidthField="lapDistance"
               [minX]="0"
               [maxX]="lapChartMaxDistance(laps)"
-              [xAxisInterval]="5000"
               [xAxisPipe]="kilometersPipe"
-              [xAxisPipeArgs]="[0]"
+              [xAxisPipeArgs]="[1]"
               [minY]="lapChartMinPace(laps)"
               [maxY]="lapChartMaxPace(laps)"
-              [yAxisInterval]="10000"
               [yAxisPipe]="durationPipe"
             />
           </figure>

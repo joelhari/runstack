@@ -1,45 +1,33 @@
+
 :host {
   display: block;
   width: 100%;
+  height: 100%;
 }
 
-.bar-chart {
-  display: block;
-  height: auto;
-  overflow: visible;
-  width: 100%;
+.grid-line-h {
+  left: -0.4rem;
 }
 
-.bar-chart__background {
-  fill: var(--bs-body-bg, #fff);
+.grid-line-v {
+  bottom: -0.4rem;
 }
 
-.bar-chart__grid-line {
-  stroke: var(--bs-border-color, #dee2e6);
-  stroke-width: 1;
+.bar-chart-left {
+  flex-basis: 2.8rem;
 }
 
-.bar-chart__outline {
-  fill: none;
-  stroke: var(--bs-body-color, #212529);
-  stroke-width: 2;
+.bar-chart-bottom {
+  flex-basis: 1.0rem;
 }
 
-.bar-chart__bar {
-  fill: var(--bs-primary, #0d6efd);
+.bar-chart-label {
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: 0.8125rem;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.bar-chart__x-label,
-.bar-chart__y-label {
-  fill: var(--bs-secondary-color, #6c757d);
-  font-size: 13px;
-}
-
-.bar-chart__x-label {
-  text-anchor: middle;
-}
-
-.bar-chart__y-label {
-  dominant-baseline: middle;
-  text-anchor: end;
+.bar-chart-bar {
+  margin: 0 1px;
 }

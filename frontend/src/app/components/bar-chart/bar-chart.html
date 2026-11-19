@@ -1,56 +1,46 @@
-<svg
-  class="bar-chart"
-  viewBox="0 0 800 400"
-  role="img"
-  aria-label="Bar chart"
-  preserveAspectRatio="xMidYMid meet"
->
-  <rect
-    class="bar-chart__background"
-    [attr.x]="plot.left"
-    [attr.y]="plot.top"
-    [attr.width]="plot.width"
-    [attr.height]="plot.height"
-  />
-
-  @for (line of verticalGridLines(); track line.position) {
-    <line
-      class="bar-chart__grid-line"
-      [attr.x1]="line.position"
-      [attr.x2]="line.position"
-      [attr.y1]="plot.top"
-      [attr.y2]="plot.bottom + tickLength"
-    />
-    <text class="bar-chart__x-label" [attr.x]="line.position" y="377">{{ line.label }}</text>
-  }
-
-  @for (line of horizontalGridLines(); track line.position) {
-    <line
-      class="bar-chart__grid-line"
-      [attr.x1]="plot.left - tickLength"
-      [attr.x2]="plot.right"
-      [attr.y1]="line.position"
-      [attr.y2]="line.position"
-    />
-    <text class="bar-chart__y-label" x="58" [attr.y]="line.position">{{ line.label }}</text>
-  }
-
-  @for (bar of bars(); track $index) {
-    <path
-      class="bar-chart__bar"
-      [attr.d]="barPath(bar)"
-      [attr.x]="bar.x"
-      [attr.y]="bar.y"
-      [attr.width]="bar.width"
-      [attr.height]="bar.height"
-    />
-  }
-
-  <rect
-    class="bar-chart__outline"
-    [attr.x]="plot.left"
-    [attr.y]="plot.top"
-    [attr.width]="plot.width"
-    [attr.height]="plot.height"
-  />
-</svg>
+<div class="d-flex flex-column w-100 h-100" role="img" aria-label="Bar chart">
+  <div class="d-flex flex-row flex-grow-1 flex-shrink-1">
+    <div class="bar-chart-left position-relative flex-grow-0 flex-shrink-0">
+      @for (line of horizontalGridLines(); track line.position) {
+        <span class="bar-chart-label position-absolute translate-middle-y text-end start-0 end-0 pe-2" [style.top.%]="line.position">
+          {{ line.label }}
+        </span>
+      }
+    </div>
+    <div class="position-relative flex-grow-1 flex-shrink-1 border border-black">
+      @for (line of horizontalGridLines(); track line.position) {
+        <div
+          class="grid-line-h position-absolute end-0 border-bottom z-n1"
+          [style.top.%]="line.position"
+        ></div>
+      }
+      @for (line of verticalGridLines(); track line.position) {
+        <div
+          class="grid-line-v position-absolute top-0 border-end z-n1"
+          [style.left.%]="line.position"
+        ></div>
+      }
+      @for (bar of bars(); track $index) {
+        <div
+          class="position-absolute bottom-0 z-2"
+          [style.height.%]="bar.height"
+          [style.left.%]="bar.left"
+          [style.width.%]="bar.width"
+          [title]="bar.value"
+        >
+          <div class="bar-chart-bar h-100 bg-primary rounded-top-1"></div>
+        </div>
+      }
+    </div>
+  </div>
+  <div class="bar-chart-bottom d-flex flex-row flex-grow-0 flex-shrink-0 mt-2">
+    <div class="bar-chart-left flex-grow-0 flex-shrink-0"></div>
+    <div class="position-relative flex-grow-1 flex-shrink-1">
+      @for (line of verticalGridLines(); track line.position) {
+        <span class="bar-chart-label position-absolute translate-middle-x" [style.left.%]="line.position">
+          {{ line.label }}
+        </span>
+      }
+    </div>
+  </div>
+</div>

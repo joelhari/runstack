@@ -1,10 +1,13 @@
 import { Component, computed, input, numberAttribute, PipeTransform } from '@angular/core';
 
+const NUM_VERTICAL_GRID_LINES: number = 5
+const NUM_HORIZONTAL_GRID_LINES: number = 5
+
 interface ChartBar {
   height: number;
+  left: number;
+  value: string;
   width: number;
-  x: number;
-  y: number;
 }
 
 interface GridLine {
@@ -19,9 +22,6 @@ interface GridLine {
   templateUrl: './bar-chart.html',
 })
 export class BarChart {
-  private readonly barHorizontalMargin = 2;
-  private readonly barCornerRadius = 5;
-
   readonly records = input<readonly object[]>([]);
   readonly xField = input('');
   readonly yField = input('');
@@ -37,40 +37,28 @@ export class BarChart {
   readonly xAxisPipeArgs = input<readonly unknown[]>([]);
   readonly yAxisPipeArgs = input<readonly unknown[]>([]);
 
-  protected readonly plot = {
-    bottom: 350,
-    height: 320,
-    left: 70,
-    right: 780,
-    top: 30,
-    width: 710,
-  } as const;
-  protected readonly tickLength = 6;
-
   protected readonly verticalGridLines = computed(() =>
     this.gridLines(
       this.minX(),
       this.maxX(),
-      10,
-      this.plot.left,
-      this.plot.width,
+      NUM_VERTICAL_GRID_LINES,
       this.xAxisPipe(),
       this.xAxisPipeArgs(),
       this.xAxisInterval(),
     ),
   );
+
   protected readonly horizontalGridLines = computed(() =>
     this.gridLines(
       this.validAxisMaximum(this.minY(), this.maxY()),
       this.minY(),
-      10,
-      this.plot.top,
-      this.plot.height,
+      NUM_HORIZONTAL_GRID_LINES,
       this.yAxisPipe(),
       this.yAxisPipeArgs(),
       this.yAxisInterval(),
     ),
   );
+
   protected readonly bars = computed<ChartBar[]>(() => {
     const minX = this.minX();
     const maxX = this.validMaximum(minX, this.maxX());
@@ -83,37 +71,24 @@ export class BarChart {
       const xValue = this.clamp(this.numericValue(record, this.xField()), minX, maxX);
       const yValue = this.clampBetween(this.numericValue(record, this.yField()), minY, maxY);
       const widthValue = Math.max(0, this.numericValue(record, this.barWidthField()));
-      const x = this.plot.left + ((xValue - minX) / xRange) * this.plot.width;
-      const slotWidth = Math.min((widthValue / xRange) * this.plot.width, this.plot.right - x);
-      const horizontalMargin = Math.min(this.barHorizontalMargin, slotWidth / 2);
-      const width = slotWidth - horizontalMargin * 2;
-      const height = ((yValue - minY) / yRange) * this.plot.height;
+      const left = ((xValue - minX) / xRange) * 100;
+      const availableWidth = 100 - left;
+      const width = Math.min((widthValue / xRange) * 100, availableWidth);
+      const height = ((yValue - minY) / yRange) * 100;
 
-      return { x: x + horizontalMargin, y: this.plot.bottom - height, width, height };
+      return {
+        height,
+        left,
+        value: this.formatLabel(yValue, this.yAxisPipe(), this.yAxisPipeArgs()),
+        width,
+      };
     });
   });
-
-  protected barPath(bar: ChartBar): string {
-    const radius = Math.min(this.barCornerRadius, bar.width / 2, bar.height);
-    const right = bar.x + bar.width;
-
-    return [
-      `M ${bar.x} ${this.plot.bottom}`,
-      `V ${bar.y + radius}`,
-      `Q ${bar.x} ${bar.y} ${bar.x + radius} ${bar.y}`,
-      `H ${right - radius}`,
-      `Q ${right} ${bar.y} ${right} ${bar.y + radius}`,
-      `V ${this.plot.bottom}`,
-      'Z',
-    ].join(' ');
-  }
 
   private gridLines(
     startValue: number,
     endValue: number,
     count: number,
-    startPosition: number,
-    length: number,
     pipe: PipeTransform | null,
     pipeArgs: readonly unknown[],
     interval: number,
@@ -122,30 +97,52 @@ export class BarChart {
     const absoluteInterval = Math.abs(interval);
     const values = absoluteInterval
       ? this.intervalValues(startValue, endValue, absoluteInterval)
-      : Array.from({ length: count }, (_, index) =>
-          count === 1 ? startValue : startValue + range * (index / (count - 1)),
-        );
+      : this.automaticIntervalValues(startValue, endValue, count);
 
-    return values.map((value) => {
-      const ratio = range === 0 ? 0 : (value - startValue) / range;
-      return {
-        label: this.formatLabel(value, pipe, pipeArgs),
-        position: startPosition + length * ratio,
-      };
-    });
+    return values.map((value) => ({
+      label: this.formatLabel(value, pipe, pipeArgs),
+      position: range === 0 ? 0 : ((value - startValue) / range) * 100,
+    }));
   }
 
   private intervalValues(start: number, end: number, interval: number): number[] {
     const lowerBound = Math.min(start, end);
     const upperBound = Math.max(start, end);
+    if (lowerBound === upperBound) {
+      return [start];
+    }
+
     const firstValue = (Math.floor(lowerBound / interval) + 1) * interval;
     const values: number[] = [];
-
     for (let value = firstValue; value < upperBound; value += interval) {
       values.push(value);
     }
-
     return start <= end ? values : values.reverse();
+  }
+
+  private automaticIntervalValues(start: number, end: number, count: number): number[] {
+    const lowerBound = Math.min(start, end);
+    const upperBound = Math.max(start, end);
+    if (lowerBound === upperBound) {
+      return [start];
+    }
+
+    const interval = this.niceIntervalAtMost((upperBound - lowerBound) / Math.max(1, count));
+    const firstValue = Math.ceil(lowerBound / interval) * interval;
+    const values: number[] = [];
+    for (let value = firstValue; value <= upperBound; value += interval) {
+      values.push(value);
+    }
+    return start <= end ? values : values.reverse();
+  }
+
+  private niceIntervalAtMost(value: number): number {
+    const magnitude = 10 ** Math.floor(Math.log10(value));
+    const normalized = value / magnitude;
+    if (normalized >= 5) return 5 * magnitude;
+    if (normalized >= 2.5) return 2.5 * magnitude;
+    if (normalized >= 2) return 2 * magnitude;
+    return magnitude;
   }
 
   private numericValue(record: object, field: string): number {
@@ -178,7 +175,6 @@ export class BarChart {
     if (pipe) {
       return String(pipe.transform(value, ...pipeArgs));
     }
-
     return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(2)));
   }
 }
