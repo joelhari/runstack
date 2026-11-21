@@ -11,7 +11,8 @@
       }
       @if (crosshair(); as crosshair) {
         <span
-          class="line-chart-label line-chart-crosshair-label-y position-absolute translate-middle-y text-primary text-end start-0 end-0 pe-2 z-3 pe-none"
+          class="line-chart-label line-chart-crosshair-label-y position-absolute translate-middle-y text-end start-0 end-0 pe-2 z-3 pe-none"
+          [class]="'text-' + color()"
           [style.top.%]="crosshair.y"
         >
           {{ crosshair.yLabel }}
@@ -24,7 +25,8 @@
       (mouseleave)="hideCrosshair()"
     >
       <div
-        class="position-absolute start-0 end-0 border-bottom border-primary-subtle z-1 pe-none"
+        class="position-absolute start-0 end-0 border-bottom z-1 pe-none"
+        [class]="'border-' + color() + '-subtle'"
         [class.invisible]="!crosshair()"
         [style.top.%]="crosshair()?.y"
       ></div>
@@ -47,6 +49,7 @@
       }
       <svg
         class="line-chart-line position-absolute top-0 start-0 w-100 h-100 z-2 pe-none"
+        [class]="'text-' + color()"
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
         aria-hidden="true"

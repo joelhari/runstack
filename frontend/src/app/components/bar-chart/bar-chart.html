@@ -34,7 +34,7 @@
           (mouseenter)="barHover.emit(bar.record)"
           (mouseleave)="barHoverEnd.emit(bar.record)"
         >
-          <div class="bar-chart-bar h-100 bg-primary rounded-top-1"></div>
+          <div class="bar-chart-bar h-100 rounded-top-1" [class]="'bg-' + color()"></div>
         </div>
       }
     </div>

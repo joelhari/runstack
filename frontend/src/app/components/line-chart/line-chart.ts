@@ -35,6 +35,7 @@ interface InterpolatedValue {
 })
 export class LineChart {
   readonly records = input<readonly object[]>([]);
+  readonly color = input<string>('primary');
   readonly xField = input('');
   readonly yField = input('');
   readonly minX = input(0, { transform: numberAttribute });

@@ -24,6 +24,7 @@ interface GridLine {
 })
 export class BarChart {
   readonly records = input<readonly object[]>([]);
+  readonly color = input<string>('primary');
   readonly xField = input('');
   readonly yField = input('');
   readonly barWidthField = input('');

@@ -45,6 +45,14 @@ describe('LineChart', () => {
     expect(polyline.getAttribute('points')).toBe('0,100 50,50 100,0');
   });
 
+  it('uses the selected Bootstrap color for the line', () => {
+    fixture.componentRef.setInput('color', 'danger');
+    fixture.detectChanges();
+
+    const svg = fixture.nativeElement.querySelector('svg');
+    expect(svg.classList.contains('text-danger')).toBe(true);
+  });
+
   it('should clamp line points to the chart bounds', () => {
     fixture.componentRef.setInput('records', [
       { x: -10, y: 150 },
@@ -75,6 +83,7 @@ describe('LineChart', () => {
   });
 
   it('should show an interpolated crosshair at the mouse x position', () => {
+    fixture.componentRef.setInput('color', 'success');
     fixture.componentRef.setInput('records', [
       { x: 0, y: 10 },
       { x: 100, y: 20 },
@@ -107,11 +116,13 @@ describe('LineChart', () => {
     expect(vertical.classList.contains('invisible')).toBe(false);
     expect(horizontal.style.top).toBe('75%');
     expect(vertical.style.left).toBe('25%');
+    expect(horizontal.classList.contains('border-success-subtle')).toBe(true);
     const leftLabels = fixture.nativeElement.querySelectorAll('.line-chart-left .line-chart-label');
     const bottomLabels = fixture.nativeElement.querySelectorAll(
       '.line-chart-bottom .line-chart-label',
     );
     expect(leftLabels[leftLabels.length - 1].textContent.trim()).toBe('12.5');
+    expect(leftLabels[leftLabels.length - 1].classList.contains('text-success')).toBe(true);
     expect(bottomLabels[bottomLabels.length - 1].textContent.trim()).toBe('25');
 
     plot.dispatchEvent(new MouseEvent('mouseleave'));

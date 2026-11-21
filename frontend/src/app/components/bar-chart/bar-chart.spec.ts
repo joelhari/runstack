@@ -19,6 +19,19 @@ describe('BarChart', () => {
     expect(component).toBeTruthy();
   });
 
+  it('uses the selected Bootstrap color for bars', () => {
+    fixture.componentRef.setInput('records', [{ x: 0, y: 10, width: 10 }]);
+    fixture.componentRef.setInput('xField', 'x');
+    fixture.componentRef.setInput('yField', 'y');
+    fixture.componentRef.setInput('barWidthField', 'width');
+    fixture.componentRef.setInput('color', 'secondary');
+    fixture.detectChanges();
+
+    const bar = fixture.nativeElement.querySelector('.bar-chart-bar');
+    expect(bar.classList.contains('bg-secondary')).toBe(true);
+    expect(bar.classList.contains('bg-primary')).toBe(false);
+  });
+
   it('renders grid lines with labels', () => {
     fixture.detectChanges();
     const host = fixture.nativeElement as HTMLElement;

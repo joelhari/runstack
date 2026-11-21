@@ -46,7 +46,7 @@
 
 .line-chart-line polyline {
   fill: none;
-  stroke: var(--bs-primary, #0d6efd);
+  stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2;
