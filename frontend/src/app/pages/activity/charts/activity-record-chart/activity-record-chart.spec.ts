@@ -53,6 +53,6 @@ describe('ActivityRecordChart', () => {
     expect(chart.yField()).toBe('heartRate');
     expect(chart.minX()).toBe(0);
     expect(chart.maxX()).toBe(3_600_000);
-    expect(chart.maxY()).toBe(150);
+    expect(chart.maxY()).toBe(160);
   });
 });

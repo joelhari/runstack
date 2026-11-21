@@ -1,4 +1,4 @@
-import { Component, computed, input, numberAttribute, PipeTransform } from '@angular/core';
+import { Component, computed, input, numberAttribute, PipeTransform, signal } from '@angular/core';
 
 const NUM_VERTICAL_GRID_LINES: number = 5;
 const NUM_HORIZONTAL_GRID_LINES: number = 5;
@@ -6,6 +6,25 @@ const NUM_HORIZONTAL_GRID_LINES: number = 5;
 interface GridLine {
   label: string;
   position: number;
+}
+
+interface ChartPoint {
+  x: number;
+  xPosition: number;
+  y: number;
+  yPosition: number;
+}
+
+interface CrosshairPosition {
+  x: number;
+  xLabel: string;
+  y: number;
+  yLabel: string;
+}
+
+interface InterpolatedValue {
+  position: number;
+  value: number;
 }
 
 @Component({
@@ -29,6 +48,8 @@ export class LineChart {
   readonly xAxisPipeArgs = input<readonly unknown[]>([]);
   readonly yAxisPipeArgs = input<readonly unknown[]>([]);
 
+  protected readonly crosshair = signal<CrosshairPosition | null>(null);
+
   protected readonly verticalGridLines = computed(() =>
     this.gridLines(
       this.minX(),
@@ -51,7 +72,7 @@ export class LineChart {
     ),
   );
 
-  protected readonly linePoints = computed(() => {
+  private readonly chartPoints = computed<ChartPoint[]>(() => {
     const minX = this.minX();
     const maxX = this.validMaximum(minX, this.maxX());
     const minY = this.minY();
@@ -59,16 +80,76 @@ export class LineChart {
     const xRange = maxX - minX;
     const yRange = maxY - minY;
 
-    return this.records()
-      .map((record) => {
-        const xValue = this.clamp(this.numericValue(record, this.xField()), minX, maxX);
-        const yValue = this.clampBetween(this.numericValue(record, this.yField()), minY, maxY);
-        const x = ((xValue - minX) / xRange) * 100;
-        const y = 100 - ((yValue - minY) / yRange) * 100;
-        return `${x},${y}`;
-      })
-      .join(' ');
+    return this.records().map((record) => {
+      const xValue = this.clamp(this.numericValue(record, this.xField()), minX, maxX);
+      const yValue = this.clampBetween(this.numericValue(record, this.yField()), minY, maxY);
+      return {
+        x: xValue,
+        xPosition: ((xValue - minX) / xRange) * 100,
+        y: yValue,
+        yPosition: 100 - ((yValue - minY) / yRange) * 100,
+      };
+    });
   });
+
+  protected readonly linePoints = computed(() =>
+    this.chartPoints()
+      .map((point) => `${point.xPosition},${point.yPosition}`)
+      .join(' '),
+  );
+
+  protected showCrosshair(event: MouseEvent): void {
+    const target = event.currentTarget as HTMLElement;
+    const bounds = target.getBoundingClientRect();
+    if (bounds.width <= 0) {
+      this.crosshair.set(null);
+      return;
+    }
+
+    const xPosition = this.clamp(((event.clientX - bounds.left) / bounds.width) * 100, 0, 100);
+    const minX = this.minX();
+    const maxX = this.validMaximum(minX, this.maxX());
+    const xValue = minX + ((maxX - minX) * xPosition) / 100;
+    const yValue = this.interpolatedYValue(xValue);
+    this.crosshair.set(
+      yValue === null
+        ? null
+        : {
+            x: xPosition,
+            xLabel: this.formatLabel(xValue, this.xAxisPipe(), this.xAxisPipeArgs()),
+            y: yValue.position,
+            yLabel: this.formatLabel(yValue.value, this.yAxisPipe(), this.yAxisPipeArgs()),
+          },
+    );
+  }
+
+  protected hideCrosshair(): void {
+    this.crosshair.set(null);
+  }
+
+  private interpolatedYValue(xValue: number): InterpolatedValue | null {
+    const points = [...this.chartPoints()].sort((first, second) => first.x - second.x);
+    if (!points.length) return null;
+    if (xValue <= points[0].x) {
+      return { position: points[0].yPosition, value: points[0].y };
+    }
+    if (xValue >= points[points.length - 1].x) {
+      const last = points[points.length - 1];
+      return { position: last.yPosition, value: last.y };
+    }
+
+    const rightIndex = points.findIndex((point) => point.x >= xValue);
+    const left = points[rightIndex - 1];
+    const right = points[rightIndex];
+    const xRange = right.x - left.x;
+    if (xRange === 0) return { position: right.yPosition, value: right.y };
+
+    const ratio = (xValue - left.x) / xRange;
+    return {
+      position: left.yPosition + (right.yPosition - left.yPosition) * ratio,
+      value: left.y + (right.y - left.y) * ratio,
+    };
+  }
 
   private gridLines(
     startValue: number,

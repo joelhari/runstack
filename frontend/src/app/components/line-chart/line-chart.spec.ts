@@ -74,6 +74,53 @@ describe('LineChart', () => {
     expect(labels).toEqual(['x:10', 'x:20']);
   });
 
+  it('should show an interpolated crosshair at the mouse x position', () => {
+    fixture.componentRef.setInput('records', [
+      { x: 0, y: 10 },
+      { x: 100, y: 20 },
+    ]);
+    fixture.componentRef.setInput('xField', 'x');
+    fixture.componentRef.setInput('yField', 'y');
+    fixture.componentRef.setInput('minX', 0);
+    fixture.componentRef.setInput('maxX', 100);
+    fixture.componentRef.setInput('minY', 10);
+    fixture.componentRef.setInput('maxY', 20);
+    fixture.detectChanges();
+
+    const plot = fixture.nativeElement.querySelector('svg').parentElement as HTMLElement;
+    vi.spyOn(plot, 'getBoundingClientRect').mockReturnValue({
+      bottom: 100,
+      height: 100,
+      left: 10,
+      right: 210,
+      top: 0,
+      width: 200,
+      x: 10,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    plot.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 60 }));
+    fixture.detectChanges();
+
+    const [horizontal, vertical] = Array.from(plot.children) as HTMLElement[];
+    expect(horizontal.classList.contains('invisible')).toBe(false);
+    expect(vertical.classList.contains('invisible')).toBe(false);
+    expect(horizontal.style.top).toBe('75%');
+    expect(vertical.style.left).toBe('25%');
+    const leftLabels = fixture.nativeElement.querySelectorAll('.line-chart-left .line-chart-label');
+    const bottomLabels = fixture.nativeElement.querySelectorAll(
+      '.line-chart-bottom .line-chart-label',
+    );
+    expect(leftLabels[leftLabels.length - 1].textContent.trim()).toBe('12.5');
+    expect(bottomLabels[bottomLabels.length - 1].textContent.trim()).toBe('25');
+
+    plot.dispatchEvent(new MouseEvent('mouseleave'));
+    fixture.detectChanges();
+    expect(horizontal.classList.contains('invisible')).toBe(true);
+    expect(vertical.classList.contains('invisible')).toBe(true);
+    expect(fixture.nativeElement.textContent).not.toContain('12.5');
+  });
+
   it('should not expose bar-only inputs and outputs', () => {
     expect('barWidthField' in component).toBe(false);
     expect('highlightedBarIndex' in component).toBe(false);
