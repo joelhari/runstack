@@ -22,6 +22,11 @@ export interface AggregatedActivityRecord {
   respirationRate: AggregatedValue;
 }
 
+export type AggregatedActivityRecordValueField = Exclude<
+  keyof AggregatedActivityRecord,
+  'x' | 'sourceRecordCount'
+>;
+
 export interface AggregatedActivityRecords {
   axis: 'distance' | 'time';
   from: number;

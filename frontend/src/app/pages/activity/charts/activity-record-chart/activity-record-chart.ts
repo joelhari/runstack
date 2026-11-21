@@ -3,16 +3,19 @@ import { Component, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, of, shareReplay, switchMap } from 'rxjs';
 import { LineChart } from '../../../../components/line-chart/line-chart';
-import { AggregatedActivityRecords } from '../../../../models/activity-record';
+import {
+  AggregatedActivityRecords,
+  AggregatedActivityRecordValueField,
+} from '../../../../models/activity-record';
 import { DurationPipe } from '../../../../pipes/duration.pipe';
 import { KilometersPipe } from '../../../../pipes/kilometers.pipe';
 import { ActivityService } from '../../../../services/activity.service';
 
 type RecordAxis = 'distance' | 'time';
 
-interface HeartRateChartRecord {
+interface ChartRecord {
   x: number;
-  heartRate: number;
+  value: number;
 }
 
 @Component({
@@ -26,10 +29,12 @@ export class ActivityRecordChart {
 
   readonly activityId = input.required<number>();
   readonly axis = input.required<RecordAxis>();
+  readonly color = input('primary');
   readonly from = input(0);
   readonly to = input.required<number>();
   readonly maxPoints = input(500);
   readonly title = input.required<string>();
+  readonly yField = input.required<AggregatedActivityRecordValueField>();
 
   protected readonly durationPipe = new DurationPipe();
   protected readonly kilometersPipe = new KilometersPipe();
@@ -57,16 +62,17 @@ export class ActivityRecordChart {
     shareReplay({ bufferSize: 1, refCount: true }),
   );
 
-  protected chartRecords(records: AggregatedActivityRecords): HeartRateChartRecord[] {
-    return records.points.flatMap((record) =>
-      record.heartRate.average === null
-        ? []
-        : [{ x: record.x, heartRate: record.heartRate.average }],
-    );
+  protected chartRecords(records: AggregatedActivityRecords): ChartRecord[] {
+    const field = this.yField();
+    return records.points.flatMap((record) => {
+      const value = record[field].average;
+      return value === null ? [] : [{ x: record.x, value }];
+    });
   }
 
-  protected chartMaxHeartRate(records: AggregatedActivityRecords): number {
-    return Math.max(0, ...records.points.map((record) => record.heartRate.maximum ?? 0));
+  protected chartMaxValue(records: AggregatedActivityRecords): number {
+    const field = this.yField();
+    return Math.max(0, ...records.points.map((record) => record[field].maximum ?? 0));
   }
 
   protected xAxisPipe(): DurationPipe | KilometersPipe {

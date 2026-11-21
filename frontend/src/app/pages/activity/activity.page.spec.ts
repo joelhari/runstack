@@ -23,6 +23,7 @@ describe('ActivityPage', () => {
           {
             x: 1_000,
             heartRate: { average: 150, minimum: 150, maximum: 150, count: 1 },
+            distance: { average: 1_000, minimum: 1_000, maximum: 1_000, count: 1 },
           },
         ],
       }),

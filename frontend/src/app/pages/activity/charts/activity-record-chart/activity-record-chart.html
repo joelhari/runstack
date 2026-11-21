@@ -1,4 +1,4 @@
-<div class="d-flex flex-column w-100 h-100">
+<div class="d-flex flex-column w-100 h-100 overflow-hidden">
   @if (records$ | async; as records) {
     @if (records.points.length) {
       <figure class="records-figure d-flex flex-column flex-grow-0 flex-shrink-0 mb-4">
@@ -6,15 +6,15 @@
         <app-line-chart
           class="flex-fill"
           [records]="chartRecords(records)"
-          color="danger"
+          [color]="color()"
           xField="x"
-          yField="heartRate"
+          yField="value"
           [minX]="records.from"
           [maxX]="records.to"
           [xAxisPipe]="xAxisPipe()"
           [xAxisPipeArgs]="xAxisPipeArgs()"
           [minY]="0"
-          [maxY]="chartMaxHeartRate(records) + 10"
+          [maxY]="chartMaxValue(records) + 10"
         />
       </figure>
     } @else {

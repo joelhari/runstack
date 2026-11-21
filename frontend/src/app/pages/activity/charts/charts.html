@@ -1,14 +1,42 @@
-<div class="d-flex flex-column w-100 h-100">
+<div class="d-flex flex-column w-100 h-100 overflow-y-scroll scrollbar-width-none">
   <app-activity-record-chart
     [activityId]="activity().id"
     axis="distance"
+    color="danger"
     [to]="activity().distance * 1000"
     title="Heart rate by distance"
+    yField="heartRate"
   />
   <app-activity-record-chart
     [activityId]="activity().id"
     axis="time"
+    color="danger"
     [to]="activity().duration"
     title="Heart rate by time"
+    yField="heartRate"
+  />
+  <app-activity-record-chart
+    [activityId]="activity().id"
+    axis="time"
+    color="primary"
+    [to]="activity().duration"
+    title="Power by time"
+    yField="power"
+  />
+  <app-activity-record-chart
+    [activityId]="activity().id"
+    axis="time"
+    color="primary"
+    [to]="activity().duration"
+    title="Temperature by time"
+    yField="temperature"
+  />
+  <app-activity-record-chart
+    [activityId]="activity().id"
+    axis="time"
+    color="primary"
+    [to]="activity().duration"
+    title="Ground Contact Time by time"
+    yField="groundContactTimeMs"
   />
 </div>

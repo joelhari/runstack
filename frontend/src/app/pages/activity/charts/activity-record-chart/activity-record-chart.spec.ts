@@ -37,8 +37,10 @@ describe('ActivityRecordChart', () => {
     fixture = TestBed.createComponent(ActivityRecordChart);
     fixture.componentRef.setInput('activityId', 42);
     fixture.componentRef.setInput('axis', 'time');
+    fixture.componentRef.setInput('color', 'danger');
     fixture.componentRef.setInput('to', 3_600_000);
     fixture.componentRef.setInput('title', 'Heart rate by time');
+    fixture.componentRef.setInput('yField', 'heartRate');
     fixture.detectChanges();
     await fixture.whenStable();
   });
@@ -48,9 +50,10 @@ describe('ActivityRecordChart', () => {
 
     const chart = fixture.debugElement.query(By.directive(LineChart))
       .componentInstance as LineChart;
-    expect(chart.records()).toEqual([{ x: 1_000, heartRate: 140 }]);
+    expect(chart.records()).toEqual([{ x: 1_000, value: 140 }]);
+    expect(chart.color()).toBe('danger');
     expect(chart.xField()).toBe('x');
-    expect(chart.yField()).toBe('heartRate');
+    expect(chart.yField()).toBe('value');
     expect(chart.minX()).toBe(0);
     expect(chart.maxX()).toBe(3_600_000);
     expect(chart.maxY()).toBe(160);
