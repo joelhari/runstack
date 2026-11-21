@@ -25,6 +25,20 @@ Runstack is also intended as an alternative to analysis features that existing p
 
 Building those tools presents interesting engineering challenges, including file parsing, data modeling, persistence, API design, calculations, and responsive data visualization. At the same time, self-hosting keeps the activity data under my control and allows the platform to evolve around my own training and analysis needs.
 
+## Features
+
+- Import running activities from FIT files.
+- Explore activity data through charts for metrics such as heart rate and power.
+- Analyze lap pace visually and inspect detailed lap statistics, including heart rate, cadence, power, ascent, and descent.
+
+### Activity charts
+
+![Activity charts showing heart rate by distance and power over the activity](screenshots/activity-charts.png)
+
+### Lap analysis
+
+![Lap pace chart and detailed lap statistics](screenshots/activity-laps.png)
+
 ## Technology
 
 - Angular frontend
