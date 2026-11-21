@@ -1,0 +1,123 @@
+<div class="d-flex flex-column w-100 h-100" role="group" aria-label="Line chart">
+  <div class="d-flex flex-row flex-grow-1 flex-shrink-1">
+    <div class="line-chart-left position-relative flex-grow-0 flex-shrink-0">
+      @for (line of horizontalGridLines(); track line.position) {
+        <span
+          class="line-chart-label position-absolute translate-middle-y text-secondary text-end start-0 end-0 pe-2"
+          [style.top.%]="line.position"
+        >
+          {{ line.label }}
+        </span>
+      }
+      @if (crosshair(); as crosshair) {
+        <span
+          class="line-chart-label line-chart-crosshair-label-y position-absolute translate-middle-y text-end start-0 end-0 pe-2 z-3 pe-none"
+          [class]="'text-' + color()"
+          [style.top.%]="crosshair.y"
+        >
+          {{ crosshair.yLabel }}
+        </span>
+      }
+    </div>
+    <div
+      class="position-relative flex-grow-1 flex-shrink-1 border border-black"
+      (mousemove)="showCrosshair($event)"
+      (mouseleave)="hideCrosshair()"
+    >
+      <div
+        class="position-absolute top-0 bottom-0 border-end z-1 pe-none"
+        [class.invisible]="!crosshair()"
+        [style.left.%]="crosshair()?.x"
+      ></div>
+      <div
+        class="position-absolute start-0 end-0 border-bottom z-1 pe-none"
+        [class]="'border-' + color() + '-subtle'"
+        [class.invisible]="!crosshair()"
+        [style.top.%]="crosshair()?.y"
+      ></div>
+      @if (yField2()) {
+        <div
+          class="position-absolute start-0 end-0 border-bottom z-1 pe-none"
+          [class]="'border-' + color2() + '-subtle'"
+          [class.invisible]="crosshair()?.y2 === undefined"
+          [style.top.%]="crosshair()?.y2"
+        ></div>
+      }
+      @for (line of horizontalGridLines(); track line.position) {
+        <div
+          class="grid-line-h position-absolute end-0 border-bottom z-n1"
+          [style.top.%]="line.position"
+        ></div>
+      }
+      @for (line of verticalGridLines(); track line.position) {
+        <div
+          class="grid-line-v position-absolute top-0 border-end z-n1"
+          [style.left.%]="line.position"
+        ></div>
+      }
+      <svg
+        class="line-chart-line position-absolute top-0 start-0 w-100 h-100 z-2 pe-none"
+        [class]="'text-' + color()"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <polyline [attr.points]="linePoints()"></polyline>
+      </svg>
+      @if (yField2()) {
+        <svg
+          class="line-chart-line position-absolute top-0 start-0 w-100 h-100 z-2 pe-none"
+          [class]="'text-' + color2()"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <polyline [attr.points]="linePoints2()"></polyline>
+        </svg>
+      }
+    </div>
+    <div class="line-chart-right position-relative flex-grow-0 flex-shrink-0">
+      @if (yField2()) {
+        @for (line of horizontalGridLines2(); track line.position) {
+          <span
+            class="line-chart-label position-absolute translate-middle-y text-secondary text-end start-0 end-0 ps-2"
+            [style.top.%]="line.position"
+          >
+            {{ line.label }}
+          </span>
+        }
+        @if (crosshair()?.y2 !== undefined) {
+          <span
+            class="line-chart-label line-chart-crosshair-label-y position-absolute translate-middle-y text-end start-0 end-0 ps-2 z-3 pe-none"
+            [class]="'text-' + color2()"
+            [style.top.%]="crosshair()?.y2"
+          >
+            {{ crosshair()?.yLabel2 }}
+          </span>
+        }
+      }
+    </div>
+  </div>
+  <div class="line-chart-bottom d-flex flex-row flex-grow-0 flex-shrink-0 mt-2">
+    <div class="line-chart-left flex-grow-0 flex-shrink-0"></div>
+    <div class="position-relative flex-grow-1 flex-shrink-1">
+      @for (line of verticalGridLines(); track line.position) {
+        <span
+          class="line-chart-label position-absolute translate-middle-x text-secondary"
+          [style.left.%]="line.position"
+        >
+          {{ line.label }}
+        </span>
+      }
+      @if (crosshair(); as crosshair) {
+        <span
+          class="line-chart-label line-chart-crosshair-label-x position-absolute translate-middle-x text-secondary z-3 pe-none"
+          [style.left.%]="crosshair.x"
+        >
+          {{ crosshair.xLabel }}
+        </span>
+      }
+    </div>
+    <div class="line-chart-right flex-grow-0 flex-shrink-0"></div>
+  </div>
+</div>

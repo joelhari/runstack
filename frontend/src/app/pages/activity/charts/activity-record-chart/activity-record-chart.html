@@ -1,0 +1,34 @@
+<div class="d-flex flex-column w-100 h-100 overflow-hidden">
+  @if (records$ | async; as records) {
+    @if (records.points.length) {
+      <figure class="records-figure d-flex flex-column flex-grow-0 flex-shrink-0 mb-4">
+        <figcaption class="fw-semibold mb-2">{{ title() }}</figcaption>
+        <app-line-chart
+          class="flex-fill"
+          [records]="chartRecords(records)"
+          [color]="color()"
+          [color2]="color2()"
+          xField="x"
+          yField="value"
+          [yField2]="yField2() ? 'value2' : ''"
+          [minX]="records.from"
+          [maxX]="records.to"
+          [xAxisPipe]="xAxisPipe()"
+          [xAxisPipeArgs]="xAxisPipeArgs()"
+          [minY]="0"
+          [maxY]="chartMaxValue(records, yField()) + 10"
+          [yAxisPipe]="yAxisPipe()"
+          [yAxisPipeArgs]="yAxisPipeArgs()"
+          [minY2]="0"
+          [maxY2]="yField2() ? chartMaxValue(records, yField2()) + 10 : null"
+          [yAxisPipe2]="yAxisPipe2()"
+          [yAxisPipeArgs2]="yAxisPipeArgs2()"
+        />
+      </figure>
+    } @else {
+      <p class="text-body-secondary">No record data is available for this activity.</p>
+    }
+  } @else {
+    <p class="text-body-secondary" role="status">Loading records…</p>
+  }
+</div>

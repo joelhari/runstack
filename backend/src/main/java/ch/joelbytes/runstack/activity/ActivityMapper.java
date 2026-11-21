@@ -7,26 +7,25 @@ public class ActivityMapper {
     
     public Activity toActivity(ActivityDTO activityDTO) {
         Activity activity = new Activity();
-        activity.setId(activityDTO.getId());
-        activity.setFitFileHash(activityDTO.getFitFileHash());
-        activity.setName(activityDTO.getName());
-        activity.setDate(activityDTO.getDate());
-        activity.setDistance(activityDTO.getDistance());
-        activity.setDuration(activityDTO.getDuration());
-        activity.setAveragePace(activityDTO.getAveragePace());
+        activity.setId(activityDTO.id());
+        activity.setFitFileHash(activityDTO.fitFileHash());
+        activity.setName(activityDTO.name());
+        activity.setDate(activityDTO.date());
+        activity.setDistance(activityDTO.distance());
+        activity.setDuration(activityDTO.duration());
+        activity.setAveragePace(activityDTO.averagePace());
         return activity;
     }
 
     public ActivityDTO toActivityDTO(Activity activity) {
-        ActivityDTO activityDTO = new ActivityDTO();
-        activityDTO.setId(activity.getId());
-        activityDTO.setFitFileHash(activity.getFitFileHash());
-        activityDTO.setName(activity.getName());
-        activityDTO.setDate(activity.getDate());
-        activityDTO.setDistance(activity.getDistance());
-        activityDTO.setDuration(activity.getDuration());
-        activityDTO.setAveragePace(activity.getAveragePace());
-        return activityDTO;
+        return new ActivityDTO(
+                activity.getId(),
+                activity.getFitFileHash(),
+                activity.getName(),
+                activity.getDate(),
+                activity.getDistance(),
+                activity.getDuration(),
+                activity.getAveragePace());
     }
 
     public ActivityLapDTO toActivityLapDTO(ActivityLap lap) {
@@ -51,4 +50,5 @@ public class ActivityMapper {
                 lap.getAscent(),
                 lap.getDescent());
     }
+
 }

@@ -1,0 +1,56 @@
+<div class="d-flex flex-column w-100 h-100 overflow-y-scroll scrollbar-width-none">
+  <app-activity-record-chart
+    [activityId]="activity().id"
+    axis="distance"
+    color="danger"
+    [to]="activity().distance * 1000"
+    title="Heart rate by distance"
+    yField="heartRate"
+    [yAxisPipe]="decimalPipe"
+    [yAxisPipeArgs]="['1.0-0']"
+  />
+  <app-activity-record-chart
+    [activityId]="activity().id"
+    axis="time"
+    color="danger"
+    [to]="activity().duration"
+    title="Heart rate by time"
+    yField="heartRate"
+    [yAxisPipe]="decimalPipe"
+    [yAxisPipeArgs]="['1.0-0']"
+  />
+  <app-activity-record-chart
+    [activityId]="activity().id"
+    axis="time"
+    color="primary"
+    color2="danger"
+    [to]="activity().duration"
+    title="Power by time"
+    yField="power"
+    yField2="heartRate"
+    [yAxisPipe]="decimalPipe"
+    [yAxisPipeArgs]="['1.0-0']"
+    [yAxisPipe2]="decimalPipe"
+    [yAxisPipeArgs2]="['1.0-0']"
+  />
+  <app-activity-record-chart
+    [activityId]="activity().id"
+    axis="time"
+    color="primary"
+    [to]="activity().duration"
+    title="Temperature by time"
+    yField="temperature"
+    [yAxisPipe]="decimalPipe"
+    [yAxisPipeArgs]="['1.0-0']"
+  />
+  <app-activity-record-chart
+    [activityId]="activity().id"
+    axis="time"
+    color="primary"
+    [to]="activity().duration"
+    title="Ground Contact Time by time"
+    yField="groundContactTimeMs"
+    [yAxisPipe]="decimalPipe"
+    [yAxisPipeArgs]="['1.0-0']"
+  />
+</div>

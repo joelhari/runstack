@@ -8,11 +8,14 @@ import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 class ActivityServiceTests {
 
@@ -66,6 +69,73 @@ class ActivityServiceTests {
         List<ActivityLap> result = service.getActivityLaps(42L);
 
         assertThat(result).containsExactly(lap);
+    }
+
+    @Test
+    void aggregatesActivityRecordsIntoEqualDistanceBuckets() {
+        ActivityRepository repository = mock(ActivityRepository.class);
+        Activity activity = new Activity();
+        activity.addRecord(record(100, 140));
+        activity.addRecord(record(200, 160));
+        activity.addRecord(record(700, 180));
+        activity.addRecord(record(1_100, 200));
+        when(repository.findById(42L)).thenReturn(Optional.of(activity));
+        ActivityService service = new ActivityService(repository, mock(FitActivityParser.class));
+
+        AggregatedActivityRecordsDTO result = service.getActivityRecords(
+                42L, "distance", 0, 1_000, 2);
+
+        assertThat(result.axis()).isEqualTo(ActivityRecordAxis.DISTANCE);
+        assertThat(result.bucketWidth()).isEqualTo(500);
+        assertThat(result.sourceRecordCount()).isEqualTo(3);
+        assertThat(result.points()).hasSize(2);
+        assertThat(result.points().get(0).x()).isEqualTo(150);
+        assertThat(result.points().get(0).sourceRecordCount()).isEqualTo(2);
+        assertThat(result.points().get(0).heartRate()).isEqualTo(
+                new AggregatedValueDTO(150D, 140D, 160D, 2));
+        assertThat(result.points().get(1).heartRate()).isEqualTo(
+                new AggregatedValueDTO(180D, 180D, 180D, 1));
+    }
+
+    @Test
+    void aggregatesActivityRecordsByElapsedTimeAndIncludesTheRangeEnd() {
+        ActivityRepository repository = mock(ActivityRepository.class);
+        Activity activity = new Activity();
+        activity.setDate(Instant.parse("2026-11-20T10:00:00Z"));
+        ActivityRecord first = record(0, 140);
+        first.setRecordedAt(Instant.parse("2026-11-20T10:00:00.500Z"));
+        ActivityRecord last = record(0, 160);
+        last.setRecordedAt(Instant.parse("2026-11-20T10:00:02Z"));
+        activity.addRecord(first);
+        activity.addRecord(last);
+        when(repository.findById(42L)).thenReturn(Optional.of(activity));
+        ActivityService service = new ActivityService(repository, mock(FitActivityParser.class));
+
+        AggregatedActivityRecordsDTO result = service.getActivityRecords(
+                42L, "time", 0, 2_000, 2);
+
+        assertThat(result.sourceRecordCount()).isEqualTo(2);
+        assertThat(result.points()).extracting(AggregatedActivityRecordDTO::x)
+                .containsExactly(500D, 2_000D);
+    }
+
+    @Test
+    void rejectsInvalidRecordAggregationParameters() {
+        ActivityService service = new ActivityService(
+                mock(ActivityRepository.class), mock(FitActivityParser.class));
+
+        assertThatThrownBy(() -> service.getActivityRecords(42L, "invalid", 0, 100, 10))
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        exception -> assertThat(exception.getStatusCode())
+                                .isEqualTo(HttpStatus.BAD_REQUEST));
+        assertThatThrownBy(() -> service.getActivityRecords(42L, "distance", 100, 0, 10))
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        exception -> assertThat(exception.getStatusCode())
+                                .isEqualTo(HttpStatus.BAD_REQUEST));
+        assertThatThrownBy(() -> service.getActivityRecords(42L, "distance", 0, 100, 2_001))
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        exception -> assertThat(exception.getStatusCode())
+                                .isEqualTo(HttpStatus.BAD_REQUEST));
     }
 
     @Test
@@ -131,5 +201,12 @@ class ActivityServiceTests {
         assertThat(newLap.getActivity()).isSameAs(existing);
         verify(repository).flush();
         verify(repository).save(existing);
+    }
+
+    private ActivityRecord record(float distance, int heartRate) {
+        ActivityRecord record = new ActivityRecord();
+        record.setDistance(distance);
+        record.setHeartRate(heartRate);
+        return record;
     }
 }
