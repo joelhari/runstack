@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, PipeTransform } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, of, shareReplay, switchMap } from 'rxjs';
 import { LineChart } from '../../../../components/line-chart/line-chart';
@@ -16,6 +16,7 @@ type RecordAxis = 'distance' | 'time';
 interface ChartRecord {
   x: number;
   value: number;
+  value2?: number;
 }
 
 @Component({
@@ -30,11 +31,17 @@ export class ActivityRecordChart {
   readonly activityId = input.required<number>();
   readonly axis = input.required<RecordAxis>();
   readonly color = input('primary');
+  readonly color2 = input('secondary');
   readonly from = input(0);
   readonly to = input.required<number>();
   readonly maxPoints = input(500);
   readonly title = input.required<string>();
   readonly yField = input.required<AggregatedActivityRecordValueField>();
+  readonly yField2 = input<AggregatedActivityRecordValueField | ''>('');
+  readonly yAxisPipe = input<PipeTransform | null>(null);
+  readonly yAxisPipeArgs = input<readonly unknown[]>([]);
+  readonly yAxisPipe2 = input<PipeTransform | null>(null);
+  readonly yAxisPipeArgs2 = input<readonly unknown[] | null>(null);
 
   protected readonly durationPipe = new DurationPipe();
   protected readonly kilometersPipe = new KilometersPipe();
@@ -64,14 +71,20 @@ export class ActivityRecordChart {
 
   protected chartRecords(records: AggregatedActivityRecords): ChartRecord[] {
     const field = this.yField();
+    const field2 = this.yField2();
     return records.points.flatMap((record) => {
       const value = record[field].average;
-      return value === null ? [] : [{ x: record.x, value }];
+      if (value === null) return [];
+      const value2 = field2 ? record[field2].average : null;
+      return [{ x: record.x, value, ...(value2 === null ? {} : { value2 }) }];
     });
   }
 
-  protected chartMaxValue(records: AggregatedActivityRecords): number {
-    const field = this.yField();
+  protected chartMaxValue(
+    records: AggregatedActivityRecords,
+    field: AggregatedActivityRecordValueField | '',
+  ): number {
+    if (!field) return 0;
     return Math.max(0, ...records.points.map((record) => record[field].maximum ?? 0));
   }
 

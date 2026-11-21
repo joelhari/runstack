@@ -53,7 +53,7 @@ describe('Charts', () => {
       .queryAll(By.directive(ActivityRecordChart))
       .map((element) => element.componentInstance as ActivityRecordChart);
 
-    expect(charts).toHaveLength(3);
+    expect(charts).toHaveLength(5);
     expect(charts[0].activityId()).toBe(42);
     expect(charts[0].axis()).toBe('distance');
     expect(charts[0].color()).toBe('danger');
@@ -65,7 +65,9 @@ describe('Charts', () => {
     expect(charts[1].color()).toBe('danger');
     expect(charts[1].to()).toBe(3_600_000);
     expect(charts[1].title()).toBe('Heart rate by time');
-    expect(charts[1].yField()).toBe('distance');
-    expect(charts[2].yField()).toBe('heartRate');
+    expect(charts[1].yField()).toBe('heartRate');
+    expect(charts[2].yField()).toBe('power');
+    expect(charts[3].yField()).toBe('temperature');
+    expect(charts[4].yField()).toBe('groundContactTimeMs');
   });
 });

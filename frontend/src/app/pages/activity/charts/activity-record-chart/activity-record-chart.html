@@ -7,14 +7,22 @@
           class="flex-fill"
           [records]="chartRecords(records)"
           [color]="color()"
+          [color2]="color2()"
           xField="x"
           yField="value"
+          [yField2]="yField2() ? 'value2' : ''"
           [minX]="records.from"
           [maxX]="records.to"
           [xAxisPipe]="xAxisPipe()"
           [xAxisPipeArgs]="xAxisPipeArgs()"
           [minY]="0"
-          [maxY]="chartMaxValue(records) + 10"
+          [maxY]="chartMaxValue(records, yField()) + 10"
+          [yAxisPipe]="yAxisPipe()"
+          [yAxisPipeArgs]="yAxisPipeArgs()"
+          [minY2]="0"
+          [maxY2]="yField2() ? chartMaxValue(records, yField2()) + 10 : null"
+          [yAxisPipe2]="yAxisPipe2()"
+          [yAxisPipeArgs2]="yAxisPipeArgs2()"
         />
       </figure>
     } @else {

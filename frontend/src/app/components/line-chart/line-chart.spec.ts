@@ -53,6 +53,72 @@ describe('LineChart', () => {
     expect(svg.classList.contains('text-danger')).toBe(true);
   });
 
+  it('draws an optional second line with an independent right y axis', () => {
+    const pipe = new TestLineChartPipe();
+    fixture.componentRef.setInput('records', [
+      { x: 0, heartRate: 120, altitude: 400 },
+      { x: 100, heartRate: 180, altitude: 600 },
+    ]);
+    fixture.componentRef.setInput('xField', 'x');
+    fixture.componentRef.setInput('yField', 'heartRate');
+    fixture.componentRef.setInput('minY', 100);
+    fixture.componentRef.setInput('maxY', 200);
+    fixture.componentRef.setInput('yField2', 'altitude');
+    fixture.componentRef.setInput('color2', 'success');
+    fixture.componentRef.setInput('minY2', 400);
+    fixture.componentRef.setInput('maxY2', 600);
+    fixture.componentRef.setInput('yAxisInterval2', 100);
+    fixture.componentRef.setInput('yAxisPipe2', pipe);
+    fixture.componentRef.setInput('yAxisPipeArgs2', ['m:']);
+    fixture.detectChanges();
+
+    const lines = fixture.nativeElement.querySelectorAll('svg');
+    expect(lines).toHaveLength(2);
+    expect(lines[1].classList.contains('text-success')).toBe(true);
+    expect(lines[1].querySelector('polyline').getAttribute('points')).toBe('0,100 100,0');
+
+    const rightLabels = Array.from(
+      fixture.nativeElement.querySelectorAll('.line-chart-right .line-chart-label'),
+      (label) => (label as HTMLElement).textContent?.trim(),
+    );
+    expect(rightLabels).toEqual(['m:500']);
+
+    const plot = lines[0].parentElement as HTMLElement;
+    vi.spyOn(plot, 'getBoundingClientRect').mockReturnValue({
+      bottom: 100,
+      height: 100,
+      left: 0,
+      right: 100,
+      top: 0,
+      width: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    plot.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 50 }));
+    fixture.detectChanges();
+
+    const secondCrosshair = plot.querySelector('.border-success-subtle') as HTMLElement;
+    expect(secondCrosshair.classList.contains('invisible')).toBe(false);
+    expect(secondCrosshair.style.top).toBe('50%');
+    const updatedRightLabels = fixture.nativeElement.querySelectorAll(
+      '.line-chart-right .line-chart-label',
+    );
+    expect(updatedRightLabels[updatedRightLabels.length - 1].textContent.trim()).toBe('m:500');
+    expect(
+      updatedRightLabels[updatedRightLabels.length - 1].classList.contains('text-success'),
+    ).toBe(true);
+  });
+
+  it('does not render a right y axis without a second y field', () => {
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('svg')).toHaveLength(1);
+    expect(
+      fixture.nativeElement.querySelectorAll('.line-chart-right .line-chart-label'),
+    ).toHaveLength(0);
+  });
+
   it('should clamp line points to the chart bounds', () => {
     fixture.componentRef.setInput('records', [
       { x: -10, y: 150 },
@@ -111,7 +177,10 @@ describe('LineChart', () => {
     plot.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 60 }));
     fixture.detectChanges();
 
-    const [horizontal, vertical] = Array.from(plot.children) as HTMLElement[];
+    const horizontal = plot.querySelector('.border-success-subtle') as HTMLElement;
+    const vertical = Array.from(plot.children).find(
+      (element) => element.classList.contains('border-end') && element.classList.contains('z-1'),
+    ) as HTMLElement;
     expect(horizontal.classList.contains('invisible')).toBe(false);
     expect(vertical.classList.contains('invisible')).toBe(false);
     expect(horizontal.style.top).toBe('75%');

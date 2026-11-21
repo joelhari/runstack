@@ -20,6 +20,8 @@ interface CrosshairPosition {
   xLabel: string;
   y: number;
   yLabel: string;
+  y2?: number;
+  yLabel2?: string;
 }
 
 interface InterpolatedValue {
@@ -36,18 +38,25 @@ interface InterpolatedValue {
 export class LineChart {
   readonly records = input<readonly object[]>([]);
   readonly color = input<string>('primary');
+  readonly color2 = input<string>('secondary');
   readonly xField = input('');
   readonly yField = input('');
+  readonly yField2 = input('');
   readonly minX = input(0, { transform: numberAttribute });
   readonly maxX = input(100, { transform: numberAttribute });
   readonly minY = input(0, { transform: numberAttribute });
   readonly maxY = input(100, { transform: numberAttribute });
+  readonly minY2 = input<number | null>(null);
+  readonly maxY2 = input<number | null>(null);
   readonly xAxisInterval = input(0, { transform: numberAttribute });
   readonly yAxisInterval = input(0, { transform: numberAttribute });
+  readonly yAxisInterval2 = input<number | null>(null);
   readonly xAxisPipe = input<PipeTransform | null>(null);
   readonly yAxisPipe = input<PipeTransform | null>(null);
+  readonly yAxisPipe2 = input<PipeTransform | null>(null);
   readonly xAxisPipeArgs = input<readonly unknown[]>([]);
   readonly yAxisPipeArgs = input<readonly unknown[]>([]);
+  readonly yAxisPipeArgs2 = input<readonly unknown[] | null>(null);
 
   protected readonly crosshair = signal<CrosshairPosition | null>(null);
 
@@ -73,6 +82,18 @@ export class LineChart {
     ),
   );
 
+  protected readonly horizontalGridLines2 = computed(() => {
+    if (!this.yField2()) return [];
+    return this.gridLines(
+      this.validAxisMaximum(this.resolvedMinY2(), this.resolvedMaxY2()),
+      this.resolvedMinY2(),
+      NUM_HORIZONTAL_GRID_LINES,
+      this.yAxisPipe2() ?? this.yAxisPipe(),
+      this.yAxisPipeArgs2() ?? this.yAxisPipeArgs(),
+      this.yAxisInterval2() ?? this.yAxisInterval(),
+    );
+  });
+
   private readonly chartPoints = computed<ChartPoint[]>(() => {
     const minX = this.minX();
     const maxX = this.validMaximum(minX, this.maxX());
@@ -93,11 +114,49 @@ export class LineChart {
     });
   });
 
+  private readonly chartPoints2 = computed<ChartPoint[]>(() => {
+    if (!this.yField2()) return [];
+    return this.createChartPoints(this.yField2(), this.resolvedMinY2(), this.resolvedMaxY2());
+  });
+
   protected readonly linePoints = computed(() =>
     this.chartPoints()
       .map((point) => `${point.xPosition},${point.yPosition}`)
       .join(' '),
   );
+
+  protected readonly linePoints2 = computed(() =>
+    this.chartPoints2()
+      .map((point) => `${point.xPosition},${point.yPosition}`)
+      .join(' '),
+  );
+
+  private resolvedMinY2(): number {
+    return this.minY2() ?? this.minY();
+  }
+
+  private resolvedMaxY2(): number {
+    return this.maxY2() ?? this.maxY();
+  }
+
+  private createChartPoints(field: string, minY: number, configuredMaxY: number): ChartPoint[] {
+    const minX = this.minX();
+    const maxX = this.validMaximum(minX, this.maxX());
+    const maxY = this.validAxisMaximum(minY, configuredMaxY);
+    const xRange = maxX - minX;
+    const yRange = maxY - minY;
+
+    return this.records().map((record) => {
+      const xValue = this.clamp(this.numericValue(record, this.xField()), minX, maxX);
+      const yValue = this.clampBetween(this.numericValue(record, field), minY, maxY);
+      return {
+        x: xValue,
+        xPosition: ((xValue - minX) / xRange) * 100,
+        y: yValue,
+        yPosition: 100 - ((yValue - minY) / yRange) * 100,
+      };
+    });
+  }
 
   protected showCrosshair(event: MouseEvent): void {
     const target = event.currentTarget as HTMLElement;
@@ -112,6 +171,7 @@ export class LineChart {
     const maxX = this.validMaximum(minX, this.maxX());
     const xValue = minX + ((maxX - minX) * xPosition) / 100;
     const yValue = this.interpolatedYValue(xValue);
+    const yValue2 = this.yField2() ? this.interpolatedYValue(xValue, this.chartPoints2()) : null;
     this.crosshair.set(
       yValue === null
         ? null
@@ -120,6 +180,16 @@ export class LineChart {
             xLabel: this.formatLabel(xValue, this.xAxisPipe(), this.xAxisPipeArgs()),
             y: yValue.position,
             yLabel: this.formatLabel(yValue.value, this.yAxisPipe(), this.yAxisPipeArgs()),
+            ...(yValue2 === null
+              ? {}
+              : {
+                  y2: yValue2.position,
+                  yLabel2: this.formatLabel(
+                    yValue2.value,
+                    this.yAxisPipe2() ?? this.yAxisPipe(),
+                    this.yAxisPipeArgs2() ?? this.yAxisPipeArgs(),
+                  ),
+                }),
           },
     );
   }
@@ -128,8 +198,11 @@ export class LineChart {
     this.crosshair.set(null);
   }
 
-  private interpolatedYValue(xValue: number): InterpolatedValue | null {
-    const points = [...this.chartPoints()].sort((first, second) => first.x - second.x);
+  private interpolatedYValue(
+    xValue: number,
+    chartPoints: readonly ChartPoint[] = this.chartPoints(),
+  ): InterpolatedValue | null {
+    const points = [...chartPoints].sort((first, second) => first.x - second.x);
     if (!points.length) return null;
     if (xValue <= points[0].x) {
       return { position: points[0].yPosition, value: points[0].y };
