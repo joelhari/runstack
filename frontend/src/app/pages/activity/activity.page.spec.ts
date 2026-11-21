@@ -8,9 +8,25 @@ describe('ActivityPage', () => {
   let component: ActivityPage;
   let fixture: ComponentFixture<ActivityPage>;
   let fragment$: BehaviorSubject<string | null>;
+  let getRecords: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     fragment$ = new BehaviorSubject<string | null>('details');
+    getRecords = vi.fn().mockReturnValue(
+      of({
+        axis: 'distance',
+        from: 0,
+        to: 5_000,
+        bucketWidth: 10,
+        sourceRecordCount: 1,
+        points: [
+          {
+            x: 1_000,
+            heartRate: { average: 150, minimum: 150, maximum: 150, count: 1 },
+          },
+        ],
+      }),
+    );
     await TestBed.configureTestingModule({
       imports: [ActivityPage],
       providers: [
@@ -58,6 +74,7 @@ describe('ActivityPage', () => {
                   descent: 5,
                 },
               ]),
+            getRecords,
           },
         },
       ],
@@ -78,12 +95,34 @@ describe('ActivityPage', () => {
     const tabs = host.querySelectorAll<HTMLElement>('[role="tab"]');
     const panel = host.querySelector<HTMLElement>('[role="tabpanel"]');
 
-    expect(Array.from(tabs, (tab) => tab.textContent?.trim())).toEqual(['Details', 'Laps']);
+    expect(Array.from(tabs, (tab) => tab.textContent?.trim())).toEqual([
+      'Details',
+      'Charts',
+      'Laps',
+    ]);
     expect(tabs[0].getAttribute('aria-selected')).toBe('true');
     expect(tabs[0].classList.contains('active')).toBe(true);
     expect(tabs[1].getAttribute('aria-selected')).toBe('false');
+    expect(tabs[2].getAttribute('aria-selected')).toBe('false');
     expect(panel?.getAttribute('aria-labelledby')).toBe('details-tab');
     expect(panel?.querySelector('app-details')).not.toBeNull();
+  });
+
+  it('shows the charts component when the Charts tab is selected', async () => {
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    const tabs = host.querySelectorAll<HTMLElement>('[role="tab"]');
+
+    tabs[1].click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const panel = host.querySelector<HTMLElement>('[role="tabpanel"]');
+    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+    expect(panel?.getAttribute('aria-labelledby')).toBe('charts-tab');
+    expect(panel?.querySelector('app-charts')).not.toBeNull();
+    expect(getRecords).toHaveBeenCalledWith(1, 'distance', 0, 5_000, 500);
+    expect(getRecords).toHaveBeenCalledWith(1, 'time', 0, 1_800_000, 500);
   });
 
   it('shows the laps component when the Laps tab is selected', () => {
@@ -97,12 +136,12 @@ describe('ActivityPage', () => {
       return true;
     };
 
-    tabs[1].click();
+    tabs[2].click();
     fixture.detectChanges();
 
     const panel = host.querySelector<HTMLElement>('[role="tabpanel"]');
-    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
-    expect(tabs[1].classList.contains('active')).toBe(true);
+    expect(tabs[2].getAttribute('aria-selected')).toBe('true');
+    expect(tabs[2].classList.contains('active')).toBe(true);
     expect(panel?.getAttribute('aria-labelledby')).toBe('laps-tab');
     expect(panel?.querySelector('app-laps')).not.toBeNull();
     expect(navigations).toContainEqual(
@@ -118,7 +157,7 @@ describe('ActivityPage', () => {
 
     const host = fixture.nativeElement as HTMLElement;
     const tabs = host.querySelectorAll<HTMLElement>('[role="tab"]');
-    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+    expect(tabs[2].getAttribute('aria-selected')).toBe('true');
     expect(host.querySelector('[role="tabpanel"]')?.getAttribute('aria-labelledby')).toBe(
       'laps-tab',
     );

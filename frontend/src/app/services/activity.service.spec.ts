@@ -56,4 +56,21 @@ describe('ActivityService', () => {
     expect(request.request.method).toBe('GET');
     request.flush([]);
   });
+
+  it('gets the records for an activity from the records endpoint', () => {
+    service.getRecords(42, 'distance', 1_000, 5_000, 500).subscribe();
+
+    const request = httpTesting.expectOne(
+      'http://localhost:8080/api/v1/activity/42/records?axis=distance&from=1000&to=5000&maxPoints=500',
+    );
+    expect(request.request.method).toBe('GET');
+    request.flush({
+      axis: 'distance',
+      from: 1_000,
+      to: 5_000,
+      bucketWidth: 8,
+      sourceRecordCount: 0,
+      points: [],
+    });
+  });
 });

@@ -32,6 +32,18 @@
           Details
         </button>
         <button
+          id="charts-tab"
+          type="button"
+          class="nav-link"
+          role="tab"
+          aria-controls="charts-panel"
+          [class.active]="selectedAnalysisTab() === 'charts'"
+          [attr.aria-selected]="selectedAnalysisTab() === 'charts'"
+          (click)="selectAnalysisTab('charts')"
+        >
+          Charts
+        </button>
+        <button
           id="laps-tab"
           type="button"
           class="nav-link"
@@ -54,6 +66,16 @@
           tabindex="0"
         >
           <app-details class="w-100 h-100" [activity]="activity" />
+        </div>
+      } @else if (selectedAnalysisTab() === 'charts') {
+        <div
+          id="charts-panel"
+          class="d-flex flex-fill flex-column min-h-0 pt-3"
+          role="tabpanel"
+          aria-labelledby="charts-tab"
+          tabindex="0"
+        >
+          <app-charts class="w-100 h-100" [activity]="activity" />
         </div>
       } @else if (selectedAnalysisTab() === 'laps') {
         <div

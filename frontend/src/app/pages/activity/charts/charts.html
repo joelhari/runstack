@@ -1,0 +1,14 @@
+<div class="d-flex flex-column w-100 h-100">
+  <app-activity-record-chart
+    [activityId]="activity().id"
+    axis="distance"
+    [to]="activity().distance * 1000"
+    title="Heart rate by distance"
+  />
+  <app-activity-record-chart
+    [activityId]="activity().id"
+    axis="time"
+    [to]="activity().duration"
+    title="Heart rate by time"
+  />
+</div>

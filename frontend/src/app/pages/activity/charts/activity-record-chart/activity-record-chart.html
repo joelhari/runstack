@@ -1,0 +1,25 @@
+<div class="d-flex flex-column w-100 h-100">
+  @if (records$ | async; as records) {
+    @if (records.points.length) {
+      <figure class="records-figure d-flex flex-column flex-grow-0 flex-shrink-0 mb-4">
+        <figcaption class="fw-semibold mb-2">{{ title() }}</figcaption>
+        <app-line-chart
+          class="flex-fill"
+          [records]="chartRecords(records)"
+          xField="x"
+          yField="heartRate"
+          [minX]="records.from"
+          [maxX]="records.to"
+          [xAxisPipe]="xAxisPipe()"
+          [xAxisPipeArgs]="xAxisPipeArgs()"
+          [minY]="0"
+          [maxY]="chartMaxHeartRate(records)"
+        />
+      </figure>
+    } @else {
+      <p class="text-body-secondary">No record data is available for this activity.</p>
+    }
+  } @else {
+    <p class="text-body-secondary" role="status">Loading records…</p>
+  }
+</div>

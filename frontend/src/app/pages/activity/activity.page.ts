@@ -4,13 +4,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map, shareReplay, switchMap } from 'rxjs';
 import { ActivityService } from '../../services/activity.service';
+import { Charts } from './charts/charts';
 import { Details } from './details/details';
 import { Laps } from './laps/laps';
 
-type AnalysisTab = 'details' | 'laps';
+type AnalysisTab = 'details' | 'charts' | 'laps';
 
 @Component({
-  imports: [AsyncPipe, DatePipe, Details, Laps, RouterLink],
+  imports: [AsyncPipe, Charts, DatePipe, Details, Laps, RouterLink],
   selector: 'app-activity',
   styleUrl: './activity.page.scss',
   templateUrl: './activity.page.html',
@@ -28,12 +29,15 @@ export class ActivityPage {
     shareReplay({ bufferSize: 1, refCount: true }),
   );
 
-  readonly activity$ = this.activityId$.pipe(switchMap((id) => this.activityService.getById(id)));
+  readonly activity$ = this.activityId$.pipe(
+    switchMap((id) => this.activityService.getById(id)),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
   readonly laps$ = this.activityId$.pipe(switchMap((id) => this.activityService.getLaps(id)));
 
   constructor() {
     this.route.fragment.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((fragment) => {
-      if (fragment === 'details' || fragment === 'laps') {
+      if (fragment === 'details' || fragment === 'charts' || fragment === 'laps') {
         this.selectedAnalysisTab.set(fragment);
       } else {
         this.selectAnalysisTab('details', true);
