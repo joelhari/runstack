@@ -1,0 +1,36 @@
+.grid-line-h {
+  left: -0.4rem;
+}
+
+.grid-line-v {
+  bottom: -0.4rem;
+}
+
+.line-chart-left {
+  flex-basis: 2.8rem;
+}
+
+.line-chart-bottom {
+  flex-basis: 1rem;
+}
+
+.line-chart-label {
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: 0.8125rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.line-chart-line {
+  overflow: visible;
+  pointer-events: none;
+}
+
+.line-chart-line polyline {
+  fill: none;
+  stroke: var(--bs-primary, #0d6efd);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}

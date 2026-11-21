@@ -1,0 +1,49 @@
+<div class="d-flex flex-column w-100 h-100" role="group" aria-label="Line chart">
+  <div class="d-flex flex-row flex-grow-1 flex-shrink-1">
+    <div class="line-chart-left position-relative flex-grow-0 flex-shrink-0">
+      @for (line of horizontalGridLines(); track line.position) {
+        <span
+          class="line-chart-label position-absolute translate-middle-y text-end start-0 end-0 pe-2"
+          [style.top.%]="line.position"
+        >
+          {{ line.label }}
+        </span>
+      }
+    </div>
+    <div class="position-relative flex-grow-1 flex-shrink-1 border border-black">
+      @for (line of horizontalGridLines(); track line.position) {
+        <div
+          class="grid-line-h position-absolute end-0 border-bottom z-n1"
+          [style.top.%]="line.position"
+        ></div>
+      }
+      @for (line of verticalGridLines(); track line.position) {
+        <div
+          class="grid-line-v position-absolute top-0 border-end z-n1"
+          [style.left.%]="line.position"
+        ></div>
+      }
+      <svg
+        class="line-chart-line position-absolute top-0 start-0 w-100 h-100 z-2"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <polyline [attr.points]="linePoints()"></polyline>
+      </svg>
+    </div>
+  </div>
+  <div class="line-chart-bottom d-flex flex-row flex-grow-0 flex-shrink-0 mt-2">
+    <div class="line-chart-left flex-grow-0 flex-shrink-0"></div>
+    <div class="position-relative flex-grow-1 flex-shrink-1">
+      @for (line of verticalGridLines(); track line.position) {
+        <span
+          class="line-chart-label position-absolute translate-middle-x"
+          [style.left.%]="line.position"
+        >
+          {{ line.label }}
+        </span>
+      }
+    </div>
+  </div>
+</div>
