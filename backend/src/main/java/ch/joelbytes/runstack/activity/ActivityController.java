@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +49,17 @@ public class ActivityController {
                 .map(activityMapper::toActivityLapDTO)
                 .toList();
         return ResponseEntity.ok(laps);
+    }
+
+    @GetMapping("/{id}/records")
+    public ResponseEntity<AggregatedActivityRecordsDTO> getActivityRecords(
+        @PathVariable long id,
+        @RequestParam String axis,
+        @RequestParam double from,
+        @RequestParam double to,
+        @RequestParam int maxPoints
+    ) {
+        return ResponseEntity.ok(activityService.getActivityRecords(id, axis, from, to, maxPoints));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -27,8 +27,8 @@ class ActivityControllerTests {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).singleElement().satisfies(activityDTO -> {
-            assertThat(activityDTO.getId()).isEqualTo(42L);
-            assertThat(activityDTO.getName()).isEqualTo("Morning run");
+            assertThat(activityDTO.id()).isEqualTo(42L);
+            assertThat(activityDTO.name()).isEqualTo("Morning run");
         });
     }
 
@@ -44,8 +44,8 @@ class ActivityControllerTests {
         ResponseEntity<ActivityDTO> response = controller.getActivity(42L);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody().getId()).isEqualTo(42L);
-        assertThat(response.getBody().getName()).isEqualTo("Morning run");
+        assertThat(response.getBody().id()).isEqualTo(42L);
+        assertThat(response.getBody().name()).isEqualTo("Morning run");
     }
 
     @Test
@@ -69,6 +69,21 @@ class ActivityControllerTests {
     }
 
     @Test
+    void getsAggregatedActivityRecords() {
+        ActivityService service = mock(ActivityService.class);
+        AggregatedActivityRecordsDTO records = new AggregatedActivityRecordsDTO(
+                ActivityRecordAxis.DISTANCE, 0, 1_000, 10, 1, List.of());
+        when(service.getActivityRecords(42L, "distance", 0, 1_000, 100)).thenReturn(records);
+        ActivityController controller = new ActivityController(new ActivityMapper(), service);
+
+        ResponseEntity<AggregatedActivityRecordsDTO> response = controller.getActivityRecords(
+                42L, "distance", 0, 1_000, 100);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isSameAs(records);
+    }
+
+    @Test
     void importsFitFileAndReturnsCreatedActivity() {
         ActivityService service = mock(ActivityService.class);
         MockMultipartFile file = new MockMultipartFile(
@@ -82,7 +97,7 @@ class ActivityControllerTests {
         ResponseEntity<ActivityDTO> response = controller.importFitFile(file);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody().getId()).isEqualTo(43L);
-        assertThat(response.getBody().getName()).isEqualTo("Garmin running");
+        assertThat(response.getBody().id()).isEqualTo(43L);
+        assertThat(response.getBody().name()).isEqualTo("Garmin running");
     }
 }

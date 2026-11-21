@@ -10,6 +10,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 @Service
 public class ActivityService {
@@ -37,6 +39,31 @@ public class ActivityService {
     @Transactional(readOnly = true)
     public List<ActivityLap> getActivityLaps(long id) {
         return List.copyOf(getActivity(id).getLaps());
+    }
+
+    @Transactional(readOnly = true)
+    public AggregatedActivityRecordsDTO getActivityRecords(
+        long id,
+        String axisValue,
+        double from,
+        double to,
+        int maxPoints
+    ) {
+        ActivityRecordAxis axis;
+        try {
+            axis = ActivityRecordAxis.from(axisValue);
+        } catch (IllegalArgumentException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage(), exception);
+        }
+        if (!Double.isFinite(from) || !Double.isFinite(to) || to <= from) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "to must be greater than from");
+        }
+        if (maxPoints < 1 || maxPoints > 2_000) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "maxPoints must be between 1 and 2000");
+        }
+
+        return ActivityRecordAggregator.aggregate(getActivity(id), axis, from, to, maxPoints);
     }
 
     @Transactional
